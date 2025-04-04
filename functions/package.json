@@ -1,0 +1,11 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for data import/export",
+  "main": "index.js",
+  "dependencies": {
+    "json2csv": "^5.0.7",
+    "csv-parse": "^5.3.0",
+    "csv-stringify": "^6.2.0"
+  }
+}
