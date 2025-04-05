@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析 - 分成收入表</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover: #45a049;
+            --border-color: #e0e0e0;
+            --background-color: #f5f5f5;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --text-primary: #2c3e50;
+            --text-secondary: #666;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px var(--shadow-color);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 2.2rem;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), #17a2b8);
+            border-radius: 4px;
+        }
+
+        .back-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .back-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-item {
+            background: linear-gradient(to bottom, #f8f9fa, #f0f0f0);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .chart-item h2 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .chart {
+            width: 100%;
+            height: 400px;
+        }
+
+        .data-summary {
+            margin-top: 2rem;
+            background: linear-gradient(to bottom, #f8f9fa, #f0f0f0);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .data-summary h2 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .summary-item {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .summary-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .chart {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>数据分析</h1>
+            <a href="index.html" class="back-btn">返回首页</a>
+        </div>
+        <div class="charts-container">
+            <div class="chart-item">
+                <h2>游戏收入分布</h2>
+                <div id="incomeDistribution" class="chart"></div>
+            </div>
+            <div class="chart-item">
+                <h2>费用构成分析</h2>
+                <div id="costStructure" class="chart"></div>
+            </div>
+            <div class="chart-item">
+                <h2>月度趋势</h2>
+                <div id="monthlyTrend" class="chart"></div>
+            </div>
+        </div>
+        <div class="data-summary">
+            <h2>数据概览</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">总可分配运营收入</div>
+                    <div class="summary-value" id="totalIncome">¥0.00</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">总通道费</div>
+                    <div class="summary-value" id="totalChannelFee">¥0.00</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">总税费</div>
+                    <div class="summary-value" id="totalTax">¥0.00</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">总分成收入</div>
+                    <div class="summary-value" id="totalShare">¥0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentBill = JSON.parse(localStorage.getItem('currentBill')) || {};
+            const tableData = currentBill.tableData || [];
+
+            // 更新数据概览
+            document.getElementById('totalIncome').textContent = '¥' + (currentBill.totalIncome || '0.00');
+            document.getElementById('totalChannelFee').textContent = '¥' + (currentBill.totalChannelFee || '0.00');
+            document.getElementById('totalTax').textContent = '¥' + (currentBill.totalTax || '0.00');
+            document.getElementById('totalShare').textContent = '¥' + (currentBill.totalShare || '0.00');
+
+            // 初始化图表
+            updateIncomeDistribution(tableData);
+            updateCostStructure(currentBill);
+            updateMonthlyTrend(tableData);
+        });
+
+        function updateIncomeDistribution(data) {
+            const chart = echarts.init(document.getElementById('incomeDistribution'));
+            
+            const chartData = data.map(row => ({
+                name: row[0] || '未命名游戏',
+                value: parseFloat(row[10]) || 0
+            }));
+
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: ¥{c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    type: 'scroll'
+                },
+                series: [{
+                    type: 'pie',
+                    radius: '70%',
+                    data: chartData,
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+
+            chart.setOption(option);
+        }
+
+        function updateCostStructure(bill) {
+            const chart = echarts.init(document.getElementById('costStructure'));
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: ¥{c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        formatter: '{d}%'
+                    },
+                    data: [
+                        { value: parseFloat(bill.totalChannelFee) || 0, name: '通道费' },
+                        { value: parseFloat(bill.totalTax) || 0, name: '税费' },
+                        { value: parseFloat(bill.totalShare) || 0, name: '分成收入' },
+                        { value: (parseFloat(bill.totalIncome) || 0) - (parseFloat(bill.totalChannelFee) || 0) - (parseFloat(bill.totalTax) || 0) - (parseFloat(bill.totalShare) || 0), name: '其他' }
+                    ]
+                }]
+            };
+
+            chart.setOption(option);
+        }
+
+        function updateMonthlyTrend(data) {
+            const chart = echarts.init(document.getElementById('monthlyTrend'));
+            
+            const monthlyData = {};
+            data.forEach(row => {
+                const month = row[1];
+                if (month) {
+                    if (!monthlyData[month]) {
+                        monthlyData[month] = {
+                            income: 0,
+                            channelFee: 0,
+                            tax: 0,
+                            share: 0
+                        };
+                    }
+                    monthlyData[month].income += parseFloat(row[4]) || 0;
+                    monthlyData[month].channelFee += parseFloat(row[6]) || 0;
+                    monthlyData[month].tax += parseFloat(row[8]) || 0;
+                    monthlyData[month].share += parseFloat(row[10]) || 0;
+                }
+            });
+
+            const months = Object.keys(monthlyData).sort();
+            const series = [{
+                name: '可分配运营收入',
+                type: 'line',
+                data: months.map(m => monthlyData[m].income.toFixed(2))
+            }, {
+                name: '分成收入',
+                type: 'line',
+                data: months.map(m => monthlyData[m].share.toFixed(2))
+            }];
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['可分配运营收入', '分成收入']
+                },
+                xAxis: {
+                    type: 'category',
+                    data: months,
+                    axisLabel: {
+                        formatter: value => value.substring(0, 7)
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: value => '¥' + value
+                    }
+                },
+                series: series
+            };
+
+            chart.setOption(option);
+        }
+
+        // 在窗口大小改变时调整图表大小
+        window.addEventListener('resize', function() {
+            const charts = ['incomeDistribution', 'costStructure', 'monthlyTrend'].map(id => 
+                echarts.getInstanceByDom(document.getElementById(id))
+            );
+            charts.forEach(chart => chart && chart.resize());
+        });
+    </script>
+</body>
+</html> 

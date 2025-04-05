@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏库管理</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>游戏库管理</h1>
+        </div>
+
+        <div class="section">
+            <div class="section-title">添加游戏</div>
+            <div class="form-group">
+                <label for="gameName">游戏名称</label>
+                <input type="text" id="gameName" placeholder="请输入游戏名称">
+            </div>
+            <div class="form-group">
+                <label for="gameCode">游戏代码</label>
+                <input type="text" id="gameCode" placeholder="请输入游戏代码">
+            </div>
+            <div class="button-group">
+                <button class="button" onclick="addGame()">添加游戏</button>
+                <button class="button secondary" onclick="window.location.href='index.html'">返回首页</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">游戏列表</div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>游戏名称</th>
+                            <th>游戏代码</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gameList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="game-library.js"></script>
+</body>
+</html> 

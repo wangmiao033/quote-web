@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渠道对账</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>渠道对账</h1>
+        </div>
+
+        <div class="section">
+            <div class="section-title">对账信息</div>
+            <div class="form-group">
+                <label for="channelName">渠道名称</label>
+                <input type="text" id="channelName" placeholder="请输入渠道名称">
+            </div>
+            <div class="form-group">
+                <label for="reconciliationDate">对账日期</label>
+                <input type="date" id="reconciliationDate">
+            </div>
+            <div class="form-group">
+                <label for="reconciliationAmount">对账金额</label>
+                <input type="number" id="reconciliationAmount" placeholder="请输入对账金额">
+            </div>
+            <div class="button-group">
+                <button class="button" onclick="addReconciliation()">添加对账</button>
+                <button class="button secondary" onclick="window.location.href='index.html'">返回首页</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">对账记录</div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>渠道名称</th>
+                            <th>对账日期</th>
+                            <th>对账金额</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reconciliationList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="channel-reconciliation.js"></script>
+</body>
+</html> 

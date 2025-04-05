@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研发对账</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 历史记录弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .button.small {
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>研发对账</h1>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <div class="stat-title">本月对账总额</div>
+                    <div class="stat-value" id="monthlyTotal">¥0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">累计对账总额</div>
+                    <div class="stat-value" id="totalAmount">¥0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">本月游戏数</div>
+                    <div class="stat-value" id="monthlyGames">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">对账信息</div>
+                <div class="section-actions">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="搜索游戏名称..." onkeyup="searchRecords()">
+                    </div>
+                    <div class="filter-box">
+                        <select id="monthFilter" onchange="filterByMonth()">
+                            <option value="">全部月份</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="button primary" onclick="addRow()">
+                    <i class="fas fa-plus"></i> 新增一行
+                </button>
+                <button class="button secondary" onclick="importCSV()">
+                    <i class="fas fa-file-import"></i> 导入CSV
+                </button>
+                <button class="button" onclick="exportCSV()">
+                    <i class="fas fa-file-export"></i> 导出CSV
+                </button>
+                <button class="button" onclick="exportXLSX()">
+                    <i class="fas fa-file-excel"></i> 导出XLSX
+                </button>
+                <button class="button warning" onclick="deleteSelected()">
+                    <i class="fas fa-trash"></i> 删除选中
+                </button>
+                <button class="button" onclick="window.location.href='index.html'">
+                    <i class="fas fa-home"></i> 返回首页
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="30px">
+                                <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                            </th>
+                            <th>游戏名称</th>
+                            <th>结算月份</th>
+                            <th>充值金额</th>
+                            <th>测试费&代金券</th>
+                            <th>可分配收入</th>
+                            <th>通道费率(%)</th>
+                            <th>通道费</th>
+                            <th>税率(%)</th>
+                            <th>税费</th>
+                            <th>分成比例(%)</th>
+                            <th>分成收入</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reconciliationTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">汇总信息</div>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-title">可分配运营收入</div>
+                    <div class="summary-value" id="totalOperatingIncome">¥0.00</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-title">通道费总计</div>
+                    <div class="summary-value" id="totalChannelFee">¥0.00</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-title">税费总计</div>
+                    <div class="summary-value" id="totalTax">¥0.00</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-title">分成收入总计</div>
+                    <div class="summary-value" id="totalShareIncome">¥0.00</div>
+                </div>
+            </div>
+            <div class="amount-in-words" id="amountInWords">
+                分成收入总计（大写）：零元整
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史记录弹窗 -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">历史记录</h2>
+                <button class="close-button" onclick="closeHistoryModal()">&times;</button>
+            </div>
+            <ul id="historyList" class="history-list"></ul>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="dev-reconciliation.js"></script>
+</body>
+</html> 
