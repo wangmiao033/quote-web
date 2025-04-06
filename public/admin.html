@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏分成管理系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="admin.html" class="sidebar-logo">
+                    <i class="fas fa-gamepad"></i>
+                    <span>游戏分成管理</span>
+                </a>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-title">概览</div>
+                    <a href="admin.html" class="menu-item active">
+                        <i class="fas fa-home"></i>
+                        <span>控制台</span>
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-title">收入管理</div>
+                    <a href="income-stats.html" class="menu-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>收入统计</span>
+                    </a>
+                    <a href="income-analysis.html" class="menu-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>收入分析</span>
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-title">对账管理</div>
+                    <a href="dev-reconciliation.html" class="menu-item">
+                        <i class="fas fa-code"></i>
+                        <span>研发对账</span>
+                    </a>
+                    <a href="channel-reconciliation.html" class="menu-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>渠道对账</span>
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-title">游戏管理</div>
+                    <a href="game-library.html" class="menu-item">
+                        <i class="fas fa-gamepad"></i>
+                        <span>游戏库</span>
+                    </a>
+                    <a href="game-analysis.html" class="menu-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>游戏分析</span>
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-title">财务管理</div>
+                    <a href="invoice-management.html" class="menu-item">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>发票管理</span>
+                    </a>
+                    <a href="payment-management.html" class="menu-item">
+                        <i class="fas fa-money-check-alt"></i>
+                        <span>付款管理</span>
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-title">系统设置</div>
+                    <a href="user-management.html" class="menu-item">
+                        <i class="fas fa-users-cog"></i>
+                        <span>用户管理</span>
+                    </a>
+                    <a href="system-settings.html" class="menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 主要内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航栏 -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="toggle-sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>控制台</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>概览</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <div class="header-action">
+                            <i class="far fa-bell"></i>
+                        </div>
+                        <div class="header-action">
+                            <i class="far fa-envelope"></i>
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <div class="user-avatar">
+                            A
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name" id="currentUser">管理员</span>
+                            <span class="user-role">系统管理员</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-container">
+                <div class="page-header">
+                    <h1 class="page-title">控制台</h1>
+                    <p class="page-description">欢迎使用游戏分成管理系统，这里展示了系统的重要指标和数据概览。</p>
+                </div>
+
+                <!-- 数据概览卡片 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1);">
+                            <i class="fas fa-gamepad" style="color: #3b82f6;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">游戏总数</span>
+                            <span class="stat-value">24</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(5, 150, 105, 0.1);">
+                            <i class="fas fa-chart-line" style="color: #059669;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">本月收入</span>
+                            <span class="stat-value">¥286,392.45</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(217, 119, 6, 0.1);">
+                            <i class="fas fa-users" style="color: #d97706;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">活跃渠道</span>
+                            <span class="stat-value">18</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(100, 116, 139, 0.1);">
+                            <i class="fas fa-file-invoice" style="color: #64748b;"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">待处理对账</span>
+                            <span class="stat-value">6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 待处理事项 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">待处理事项</h2>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-sync"></i>
+                            刷新
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>类型</th>
+                                        <th>标题</th>
+                                        <th>状态</th>
+                                        <th>截止日期</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>研发对账</td>
+                                        <td>《王者荣耀》1月份对账单待确认</td>
+                                        <td>待处理</td>
+                                        <td>2024-02-15</td>
+                                        <td>
+                                            <button class="btn btn-primary">处理</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>渠道对账</td>
+                                        <td>应用宝1月份对账单待核对</td>
+                                        <td>待处理</td>
+                                        <td>2024-02-15</td>
+                                        <td>
+                                            <button class="btn btn-primary">处理</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>发票管理</td>
+                                        <td>《和平精英》发票待开具</td>
+                                        <td>待处理</td>
+                                        <td>2024-02-20</td>
+                                        <td>
+                                            <button class="btn btn-primary">处理</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 侧边栏切换
+        document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        });
+    </script>
+</body>
+</html> 

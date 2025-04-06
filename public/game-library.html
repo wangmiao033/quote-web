@@ -6,54 +6,803 @@
     <title>游戏库 - 游戏分成管理系统</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.css">
 </head>
 <body>
-    <nav class="navbar">
-        <h1 class="navbar-title">游戏库</h1>
-        <button class="navbar-button" onclick="window.location.href='index.html'">
-            <i class="fas fa-home"></i> 返回首页
-        </button>
-    </nav>
-
-    <div class="container">
-        <div class="card">
-            <div class="card-header">
-                <h2>游戏库管理</h2>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-logo">
+                    <i class="fas fa-gamepad"></i>
+                    <span>游戏分成管理</span>
+                </a>
             </div>
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-title">功能导航</div>
+                    <a href="dev-reconciliation.html" class="menu-item">
+                        <i class="fas fa-code"></i>
+                        <span>研发对账</span>
+                    </a>
+                    <a href="channel-reconciliation.html" class="menu-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>渠道对账</span>
+                    </a>
+                    <a href="game-library.html" class="menu-item active">
+                        <i class="fas fa-gamepad"></i>
+                        <span>游戏库</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="gameName">游戏名称</label>
-                    <input type="text" id="gameName" class="form-control" placeholder="请输入游戏名称">
+        <!-- 主要内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航栏 -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="toggle-sidebar" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>游戏库</span>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="gameCode">游戏代码</label>
-                    <input type="text" id="gameCode" class="form-control" placeholder="请输入游戏代码">
-                </div>
-                <div class="form-group">
-                    <button class="button primary" onclick="addGame()">
-                        <i class="fas fa-plus"></i> 添加游戏
+                <div class="header-right">
+                    <button class="btn btn-icon" title="刷新页面" onclick="window.location.reload()">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
-            </div>
+            </header>
 
-            <div class="table-container">
-                <table id="gameTable">
-                    <thead>
-                        <tr>
-                            <th>游戏名称</th>
-                            <th>游戏代码</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <!-- 页面内容 -->
+            <div class="page-container">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h1 class="page-title">游戏库管理</h1>
+                        <p class="page-description">管理游戏信息、版本、运营数据等</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="openAddGameModal()">
+                            <i class="fas fa-plus"></i>
+                            添加游戏
+                        </button>
+                        <button class="btn btn-secondary" onclick="openBatchOperationModal()">
+                            <i class="fas fa-tasks"></i>
+                            批量操作
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 数据统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #e3f2fd;">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">总游戏数</div>
+                            <div class="stat-value" id="totalGames">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #e8f5e9;">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">运营中</div>
+                            <div class="stat-value" id="activeGames">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #fff3e0;">
+                            <i class="fas fa-vial"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">测试中</div>
+                            <div class="stat-value" id="testingGames">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #ffebee;">
+                            <i class="fas fa-stop-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">已停运</div>
+                            <div class="stat-value" id="stoppedGames">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜索和筛选 -->
+                <div class="filter-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索游戏名称、ID或标签..." id="searchInput" onkeyup="filterGames()">
+                    </div>
+                    <div class="filter-group">
+                        <select id="statusFilter" onchange="filterGames()">
+                            <option value="">全部状态</option>
+                            <option value="active">运营中</option>
+                            <option value="testing">测试中</option>
+                            <option value="stopped">已停运</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="typeFilter" onchange="filterGames()">
+                            <option value="">全部类型</option>
+                            <option value="casual">休闲游戏</option>
+                            <option value="action">动作游戏</option>
+                            <option value="strategy">策略游戏</option>
+                            <option value="rpg">角色扮演</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="tagFilter" onchange="filterGames()">
+                            <option value="">全部标签</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 游戏列表 -->
+                <div class="card">
+                    <div class="table-container">
+                        <table id="gamesTable">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                                    <th>游戏ID</th>
+                                    <th>游戏名称</th>
+                                    <th>公司</th>
+                                    <th>游戏类型</th>
+                                    <th>状态</th>
+                                    <th>上线时间</th>
+                                    <th>分成比例</th>
+                                    <th>评分</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gamesTableBody">
+                                <!-- 数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 游戏详情卡片 -->
+                <div class="card" id="gameDetailsCard" style="display: none;">
+                    <div class="card-header">
+                        <h3>游戏详情</h3>
+                        <button class="btn btn-icon" onclick="closeGameDetails()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="game-details-grid">
+                            <div class="game-info">
+                                <h4 id="detailGameName"></h4>
+                                <div class="game-meta">
+                                    <span class="game-id" id="detailGameId"></span>
+                                    <span class="game-type" id="detailGameType"></span>
+                                    <span class="game-status" id="detailGameStatus"></span>
+                                </div>
+                                <div class="game-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">分成比例</span>
+                                        <span class="stat-value" id="detailShareRatio"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">上线时间</span>
+                                        <span class="stat-value" id="detailLaunchDate"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">评分</span>
+                                        <span class="stat-value" id="detailRating"></span>
+                                    </div>
+                                </div>
+                                <div class="game-tags" id="detailGameTags"></div>
+                            </div>
+                            <div class="game-charts">
+                                <canvas id="revenueChart"></canvas>
+                                <canvas id="userChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="game-versions">
+                            <h4>版本历史</h4>
+                            <table class="version-table">
+                                <thead>
+                                    <tr>
+                                        <th>版本号</th>
+                                        <th>更新时间</th>
+                                        <th>更新内容</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="versionHistory">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加游戏弹窗 -->
+    <div class="modal" id="addGameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加游戏</h2>
+                <button class="close-button" onclick="closeAddGameModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addGameForm">
+                    <div class="form-group">
+                        <label for="gameName">游戏名称</label>
+                        <input type="text" id="gameName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gameCompany">公司</label>
+                        <input type="text" id="gameCompany" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gameType">游戏类型</label>
+                        <select id="gameType" required>
+                            <option value="casual">休闲游戏</option>
+                            <option value="action">动作游戏</option>
+                            <option value="strategy">策略游戏</option>
+                            <option value="rpg">角色扮演</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gameStatus">运营状态</label>
+                        <select id="gameStatus" required>
+                            <option value="testing">测试中</option>
+                            <option value="active">运营中</option>
+                            <option value="stopped">已停运</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="launchDate">上线时间</label>
+                        <input type="date" id="launchDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="shareRatio">分成比例</label>
+                        <input type="number" id="shareRatio" min="0" max="100" step="0.1" required>
+                        <span class="input-suffix">%</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="gameTags">游戏标签</label>
+                        <div class="tags-input">
+                            <input type="text" id="gameTags" placeholder="输入标签后按回车">
+                            <div class="tags-container" id="tagsContainer"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="gameDescription">游戏描述</label>
+                        <textarea id="gameDescription" rows="4"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddGameModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveGame()">保存</button>
             </div>
         </div>
     </div>
 
-    <script src="game-library.js"></script>
+    <!-- 批量操作弹窗 -->
+    <div class="modal" id="batchOperationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>批量操作</h2>
+                <button class="close-button" onclick="closeBatchOperationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>选择操作</label>
+                    <select id="batchOperation">
+                        <option value="updateStatus">更新状态</option>
+                        <option value="updateShareRatio">更新分成比例</option>
+                        <option value="addTags">添加标签</option>
+                        <option value="export">导出选中项</option>
+                        <option value="delete">删除选中项</option>
+                    </select>
+                </div>
+                <div id="batchOperationForm"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBatchOperationModal()">取消</button>
+                <button class="btn btn-primary" onclick="executeBatchOperation()">执行</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据导入导出工具栏 -->
+    <div class="toolbar">
+        <button class="btn btn-secondary" onclick="exportToExcel()">
+            <i class="fas fa-file-excel"></i>
+            导出Excel
+        </button>
+        <button class="btn btn-secondary" onclick="importFromExcel()">
+            <i class="fas fa-file-upload"></i>
+            导入Excel
+        </button>
+        <input type="file" id="fileInput" style="display: none" accept=".xlsx" onchange="handleFileSelect(event)">
+    </div>
+
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
+        // 游戏数据
+        let games = [
+            {
+                id: 'G001',
+                name: '王者荣耀',
+                company: '腾讯游戏',
+                type: 'action',
+                status: 'active',
+                launchDate: '2020-01-15',
+                shareRatio: 70,
+                rating: 4.8,
+                tags: ['MOBA', '竞技', '团队'],
+                description: '一款5V5团队竞技手游',
+                versions: [
+                    {
+                        version: '1.0.0',
+                        date: '2020-01-15',
+                        content: '游戏正式上线',
+                        status: 'released'
+                    }
+                ],
+                stats: {
+                    revenue: [100, 150, 200, 180, 220, 250],
+                    users: [1000, 2000, 3000, 4000, 5000, 6000]
+                }
+            },
+            {
+                id: 'G002',
+                name: '和平精英',
+                company: '腾讯游戏',
+                type: 'action',
+                status: 'active',
+                launchDate: '2021-03-20',
+                shareRatio: 65,
+                rating: 4.7,
+                tags: ['射击', '生存', '竞技'],
+                description: '一款战术竞技类射击手游',
+                versions: [
+                    {
+                        version: '1.0.0',
+                        date: '2021-03-20',
+                        content: '游戏正式上线',
+                        status: 'released'
+                    }
+                ],
+                stats: {
+                    revenue: [80, 120, 160, 140, 180, 200],
+                    users: [800, 1600, 2400, 3200, 4000, 4800]
+                }
+            },
+            {
+                id: 'G003',
+                name: '开心消消乐',
+                company: '快乐互娱',
+                type: 'casual',
+                status: 'active',
+                launchDate: '2022-06-10',
+                shareRatio: 60,
+                rating: 4.5,
+                tags: ['休闲', '益智', '消除'],
+                description: '一款休闲益智类消除手游',
+                versions: [
+                    {
+                        version: '1.0.0',
+                        date: '2022-06-10',
+                        content: '游戏正式上线',
+                        status: 'released'
+                    }
+                ],
+                stats: {
+                    revenue: [50, 70, 90, 80, 100, 120],
+                    users: [500, 1000, 1500, 2000, 2500, 3000]
+                }
+            }
+        ];
+
+        // 页面加载时初始化
+        window.onload = function() {
+            renderGames();
+            updateStats();
+            initializeCharts();
+            loadTags();
+        };
+
+        // 渲染游戏列表
+        function renderGames() {
+            const tbody = document.getElementById('gamesTableBody');
+            tbody.innerHTML = '';
+            
+            games.forEach(game => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="game-checkbox" value="${game.id}"></td>
+                    <td>${game.id}</td>
+                    <td>${game.name}</td>
+                    <td>${game.company || '-'}</td>
+                    <td>${getGameTypeName(game.type)}</td>
+                    <td><span class="status-badge ${game.status}">${getStatusName(game.status)}</span></td>
+                    <td>${game.launchDate}</td>
+                    <td>${game.shareRatio}%</td>
+                    <td>
+                        <div class="rating">
+                            <span class="stars">${getStarsHTML(game.rating)}</span>
+                            <span class="rating-value">${game.rating}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-icon" onclick="viewGameDetails('${game.id}')" title="查看详情">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-icon" onclick="editGame('${game.id}')" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-icon" onclick="deleteGame('${game.id}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            document.getElementById('totalGames').textContent = games.length;
+            document.getElementById('activeGames').textContent = games.filter(g => g.status === 'active').length;
+            document.getElementById('testingGames').textContent = games.filter(g => g.status === 'testing').length;
+            document.getElementById('stoppedGames').textContent = games.filter(g => g.status === 'stopped').length;
+        }
+
+        // 初始化图表
+        function initializeCharts() {
+            // 收入图表
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: '收入趋势',
+                        data: [0, 0, 0, 0, 0, 0],
+                        borderColor: '#2196f3',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '收入趋势'
+                        }
+                    }
+                }
+            });
+
+            // 用户图表
+            const userCtx = document.getElementById('userChart').getContext('2d');
+            new Chart(userCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: '用户增长',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#4caf50'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '用户增长'
+                        }
+                    }
+                }
+            });
+        }
+
+        // 加载标签
+        function loadTags() {
+            const tagFilter = document.getElementById('tagFilter');
+            const allTags = new Set();
+            
+            games.forEach(game => {
+                game.tags.forEach(tag => allTags.add(tag));
+            });
+            
+            allTags.forEach(tag => {
+                tagFilter.add(new Option(tag, tag));
+            });
+        }
+
+        // 获取游戏类型名称
+        function getGameTypeName(type) {
+            const types = {
+                'casual': '休闲游戏',
+                'action': '动作游戏',
+                'strategy': '策略游戏',
+                'rpg': '角色扮演',
+                'other': '其他'
+            };
+            return types[type] || type;
+        }
+
+        // 获取状态名称
+        function getStatusName(status) {
+            const statuses = {
+                'active': '运营中',
+                'testing': '测试中',
+                'stopped': '已停运'
+            };
+            return statuses[status] || status;
+        }
+
+        // 获取星级HTML
+        function getStarsHTML(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            
+            let html = '';
+            for (let i = 0; i < fullStars; i++) {
+                html += '<i class="fas fa-star"></i>';
+            }
+            if (halfStar) {
+                html += '<i class="fas fa-star-half-alt"></i>';
+            }
+            for (let i = 0; i < emptyStars; i++) {
+                html += '<i class="far fa-star"></i>';
+            }
+            return html;
+        }
+
+        // 查看游戏详情
+        function viewGameDetails(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            document.getElementById('detailGameName').textContent = game.name;
+            document.getElementById('detailGameId').textContent = `ID: ${game.id}`;
+            document.getElementById('detailGameType').textContent = getGameTypeName(game.type);
+            document.getElementById('detailGameStatus').textContent = getStatusName(game.status);
+            document.getElementById('detailShareRatio').textContent = `${game.shareRatio}%`;
+            document.getElementById('detailLaunchDate').textContent = game.launchDate;
+            document.getElementById('detailRating').textContent = game.rating;
+
+            // 更新标签
+            const tagsContainer = document.getElementById('detailGameTags');
+            tagsContainer.innerHTML = '';
+            game.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'tag';
+                span.textContent = tag;
+                tagsContainer.appendChild(span);
+            });
+
+            // 更新版本历史
+            const versionHistory = document.getElementById('versionHistory');
+            versionHistory.innerHTML = '';
+            game.versions.forEach(version => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${version.version}</td>
+                    <td>${version.date}</td>
+                    <td>${version.content}</td>
+                    <td><span class="status-badge ${version.status}">${version.status === 'released' ? '已发布' : '开发中'}</span></td>
+                `;
+                versionHistory.appendChild(tr);
+            });
+
+            // 更新图表数据
+            updateCharts(game);
+
+            document.getElementById('gameDetailsCard').style.display = 'block';
+        }
+
+        // 更新图表数据
+        function updateCharts(game) {
+            const revenueChart = Chart.getChart('revenueChart');
+            const userChart = Chart.getChart('userChart');
+
+            revenueChart.data.datasets[0].data = game.stats.revenue;
+            userChart.data.datasets[0].data = game.stats.users;
+
+            revenueChart.update();
+            userChart.update();
+        }
+
+        // 关闭游戏详情
+        function closeGameDetails() {
+            document.getElementById('gameDetailsCard').style.display = 'none';
+        }
+
+        // 打开批量操作弹窗
+        function openBatchOperationModal() {
+            document.getElementById('batchOperationModal').style.display = 'flex';
+        }
+
+        // 关闭批量操作弹窗
+        function closeBatchOperationModal() {
+            document.getElementById('batchOperationModal').style.display = 'none';
+        }
+
+        // 执行批量操作
+        function executeBatchOperation() {
+            const operation = document.getElementById('batchOperation').value;
+            const selectedGames = Array.from(document.querySelectorAll('.game-checkbox:checked')).map(cb => cb.value);
+            
+            if (selectedGames.length === 0) {
+                alert('请选择要操作的游戏');
+                return;
+            }
+
+            switch (operation) {
+                case 'updateStatus':
+                    const newStatus = document.getElementById('newStatus').value;
+                    selectedGames.forEach(gameId => {
+                        const game = games.find(g => g.id === gameId);
+                        if (game) game.status = newStatus;
+                    });
+                    break;
+                case 'updateShareRatio':
+                    const newRatio = document.getElementById('newShareRatio').value;
+                    selectedGames.forEach(gameId => {
+                        const game = games.find(g => g.id === gameId);
+                        if (game) game.shareRatio = newRatio;
+                    });
+                    break;
+                case 'addTags':
+                    const newTags = document.getElementById('newTags').value.split(',');
+                    selectedGames.forEach(gameId => {
+                        const game = games.find(g => g.id === gameId);
+                        if (game) {
+                            newTags.forEach(tag => {
+                                if (!game.tags.includes(tag)) {
+                                    game.tags.push(tag);
+                                }
+                            });
+                        }
+                    });
+                    break;
+                case 'delete':
+                    if (confirm('确定要删除选中的游戏吗？')) {
+                        games = games.filter(g => !selectedGames.includes(g.id));
+                    }
+                    break;
+            }
+
+            renderGames();
+            updateStats();
+            closeBatchOperationModal();
+        }
+
+        // 导出到Excel
+        function exportToExcel() {
+            const selectedGames = Array.from(document.querySelectorAll('.game-checkbox:checked')).map(cb => cb.value);
+            const gamesToExport = selectedGames.length > 0 
+                ? games.filter(g => selectedGames.includes(g.id))
+                : games;
+
+            const data = gamesToExport.map(game => ({
+                '游戏ID': game.id,
+                '游戏名称': game.name,
+                '公司': game.company,
+                '游戏类型': getGameTypeName(game.type),
+                '状态': getStatusName(game.status),
+                '上线时间': game.launchDate,
+                '分成比例': `${game.shareRatio}%`,
+                '评分': game.rating,
+                '标签': game.tags.join(',')
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '游戏数据');
+            XLSX.writeFile(wb, '游戏数据.xlsx');
+        }
+
+        // 导入Excel
+        function importFromExcel() {
+            document.getElementById('fileInput').click();
+        }
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                // 处理导入的数据
+                jsonData.forEach(item => {
+                    const game = {
+                        id: item['游戏ID'] || generateGameId(),
+                        name: item['游戏名称'],
+                        company: item['公司'],
+                        type: getGameTypeFromName(item['游戏类型']),
+                        status: getStatusFromName(item['状态']),
+                        launchDate: item['上线时间'],
+                        shareRatio: parseFloat(item['分成比例']),
+                        rating: parseFloat(item['评分']),
+                        tags: item['标签'] ? item['标签'].split(',') : [],
+                        versions: [],
+                        stats: {
+                            revenue: [0, 0, 0, 0, 0, 0],
+                            users: [0, 0, 0, 0, 0, 0]
+                        }
+                    };
+                    games.push(game);
+                });
+
+                renderGames();
+                updateStats();
+                loadTags();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 生成游戏ID
+        function generateGameId() {
+            const lastId = games.reduce((max, game) => {
+                const num = parseInt(game.id.substring(1));
+                return num > max ? num : max;
+            }, 0);
+            return `G${String(lastId + 1).padStart(3, '0')}`;
+        }
+
+        // 从类型名称获取类型代码
+        function getGameTypeFromName(name) {
+            const types = {
+                '休闲游戏': 'casual',
+                '动作游戏': 'action',
+                '策略游戏': 'strategy',
+                '角色扮演': 'rpg',
+                '其他': 'other'
+            };
+            return types[name] || 'other';
+        }
+
+        // 从状态名称获取状态代码
+        function getStatusFromName(name) {
+            const statuses = {
+                '运营中': 'active',
+                '测试中': 'testing',
+                '已停运': 'stopped'
+            };
+            return statuses[name] || 'testing';
+        }
+
+        // 侧边栏折叠功能
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
+    </script>
 </body>
 </html> 

@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电子发票 - 游戏分成管理系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-logo">
+                    <i class="fas fa-gamepad"></i>
+                    <span>游戏分成管理</span>
+                </a>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-title">功能导航</div>
+                    <a href="dev-reconciliation.html" class="menu-item">
+                        <i class="fas fa-code"></i>
+                        <span>研发对账</span>
+                    </a>
+                    <a href="channel-reconciliation.html" class="menu-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>渠道对账</span>
+                    </a>
+                    <a href="game-library.html" class="menu-item">
+                        <i class="fas fa-gamepad"></i>
+                        <span>游戏库</span>
+                    </a>
+                    <a href="electronic-invoice.html" class="menu-item active">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>电子发票</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 主要内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航栏 -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="toggle-sidebar" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>电子发票</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-icon" title="刷新页面" onclick="window.location.reload()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-container">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h1 class="page-title">电子发票管理</h1>
+                        <p class="page-description">管理游戏分成相关的电子发票</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="openUploadModal()">
+                            <i class="fas fa-upload"></i>
+                            上传发票
+                        </button>
+                        <button class="btn btn-secondary" onclick="openBatchOperationModal()">
+                            <i class="fas fa-tasks"></i>
+                            批量操作
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 数据统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #e3f2fd;">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">总发票数</div>
+                            <div class="stat-value" id="totalInvoices">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #e8f5e9;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">已开具</div>
+                            <div class="stat-value" id="issuedInvoices">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #fff3e0;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">待开具</div>
+                            <div class="stat-value" id="pendingInvoices">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #ffebee;">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">异常</div>
+                            <div class="stat-value" id="errorInvoices">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜索和筛选 -->
+                <div class="filter-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索发票号码、游戏名称..." id="searchInput" onkeyup="filterInvoices()">
+                    </div>
+                    <div class="filter-group">
+                        <select id="statusFilter" onchange="filterInvoices()">
+                            <option value="">全部状态</option>
+                            <option value="issued">已开具</option>
+                            <option value="pending">待开具</option>
+                            <option value="error">异常</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="gameFilter" onchange="filterInvoices()">
+                            <option value="">全部游戏</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="monthFilter" onchange="filterInvoices()">
+                            <option value="">全部月份</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 发票列表 -->
+                <div class="card">
+                    <div class="table-container">
+                        <table id="invoicesTable">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                                    <th>发票号码</th>
+                                    <th>游戏名称</th>
+                                    <th>公司</th>
+                                    <th>开票日期</th>
+                                    <th>金额</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoicesTableBody">
+                                <!-- 数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 上传发票弹窗 -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>上传发票</h2>
+                <button class="close-button" onclick="closeUploadModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="invoiceNumber">发票号码</label>
+                        <input type="text" id="invoiceNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gameSelect">游戏</label>
+                        <select id="gameSelect" required>
+                            <option value="">选择游戏</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="invoiceDate">开票日期</label>
+                        <input type="date" id="invoiceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">金额</label>
+                        <input type="number" id="amount" step="0.01" required>
+                        <span class="input-suffix">元</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="invoiceFile">发票文件</label>
+                        <input type="file" id="invoiceFile" accept=".pdf,.jpg,.png" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="remarks">备注</label>
+                        <textarea id="remarks" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUploadModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveInvoice()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量操作弹窗 -->
+    <div class="modal" id="batchOperationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>批量操作</h2>
+                <button class="close-button" onclick="closeBatchOperationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>选择操作</label>
+                    <select id="batchOperation">
+                        <option value="download">下载发票</option>
+                        <option value="export">导出数据</option>
+                        <option value="delete">删除发票</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBatchOperationModal()">取消</button>
+                <button class="btn btn-primary" onclick="executeBatchOperation()">执行</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发票预览弹窗 -->
+    <div class="modal" id="previewModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>发票预览</h2>
+                <button class="close-button" onclick="closePreviewModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="invoice-preview">
+                    <div class="invoice-header">
+                        <div class="invoice-title">
+                            <h3 id="previewInvoiceTitle"></h3>
+                            <span class="invoice-number" id="previewInvoiceNumber"></span>
+                        </div>
+                        <div class="invoice-status">
+                            <span class="status-badge" id="previewInvoiceStatus"></span>
+                        </div>
+                    </div>
+                    <div class="invoice-details">
+                        <div class="detail-row">
+                            <div class="detail-label">开票日期</div>
+                            <div class="detail-value" id="previewInvoiceDate"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">游戏名称</div>
+                            <div class="detail-value" id="previewGameName"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">开票公司</div>
+                            <div class="detail-value" id="previewCompany"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">金额</div>
+                            <div class="detail-value" id="previewAmount"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">备注</div>
+                            <div class="detail-value" id="previewRemarks"></div>
+                        </div>
+                    </div>
+                    <div class="invoice-file" id="previewFile">
+                        <!-- 文件预览区域 -->
+                    </div>
+                    <div class="invoice-actions">
+                        <button class="btn btn-primary" onclick="downloadPreviewInvoice()">
+                            <i class="fas fa-download"></i>
+                            下载发票
+                        </button>
+                        <button class="btn btn-secondary" onclick="editInvoice(currentPreviewId)">
+                            <i class="fas fa-edit"></i>
+                            编辑
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑发票弹窗 -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>编辑发票</h2>
+                <button class="close-button" onclick="closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editInvoiceId">
+                    <div class="form-group">
+                        <label for="editInvoiceNumber">发票号码</label>
+                        <input type="text" id="editInvoiceNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editGameSelect">游戏</label>
+                        <select id="editGameSelect" required>
+                            <option value="">选择游戏</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editInvoiceDate">开票日期</label>
+                        <input type="date" id="editInvoiceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAmount">金额</label>
+                        <input type="number" id="editAmount" step="0.01" required>
+                        <span class="input-suffix">元</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">状态</label>
+                        <select id="editStatus" required>
+                            <option value="pending">待开具</option>
+                            <option value="issued">已开具</option>
+                            <option value="error">异常</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRemarks">备注</label>
+                        <textarea id="editRemarks" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                <button class="btn btn-primary" onclick="updateInvoice()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量导入弹窗 -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>批量导入发票</h2>
+                <button class="close-button" onclick="closeImportModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="import-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>下载模板</h4>
+                            <p>请先下载Excel导入模板</p>
+                            <button class="btn btn-secondary" onclick="downloadTemplate()">
+                                <i class="fas fa-download"></i>
+                                下载模板
+                            </button>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>上传文件</h4>
+                            <p>请选择填写好的Excel文件</p>
+                            <input type="file" id="importFile" accept=".xlsx,.xls" class="file-input">
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>导入选项</h4>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="skipExisting">
+                                    跳过已存在的发票
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="updateExisting">
+                                    更新已存在的发票
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportModal()">取消</button>
+                <button class="btn btn-primary" onclick="importInvoices()">
+                    <i class="fas fa-upload"></i>
+                    开始导入
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发票状态追踪弹窗 -->
+    <div class="modal" id="statusTrackModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>发票状态追踪</h2>
+                <button class="close-button" onclick="closeStatusTrackModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="status-timeline">
+                    <div class="timeline-header">
+                        <h3 id="trackingInvoiceNumber"></h3>
+                        <span class="badge" id="trackingCurrentStatus"></span>
+                    </div>
+                    <div class="timeline-container" id="statusTimeline">
+                        <!-- 状态时间线将通过JS动态生成 -->
+                    </div>
+                </div>
+                <div class="approval-section">
+                    <h4>审批操作</h4>
+                    <div class="form-group">
+                        <label for="approvalAction">选择操作</label>
+                        <select id="approvalAction" class="form-control">
+                            <option value="approve">通过</option>
+                            <option value="reject">驳回</option>
+                            <option value="revise">要求修改</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="approvalComments">审批意见</label>
+                        <textarea id="approvalComments" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeStatusTrackModal()">关闭</button>
+                <button class="btn btn-primary" onclick="submitApproval()">提交审批</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发票识别弹窗 -->
+    <div class="modal" id="recognizeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>发票识别</h2>
+                <button class="close-button" onclick="closeRecognizeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="recognize-container">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-hint" id="uploadHint">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>点击或拖拽发票图片到此处</p>
+                            <p class="upload-tip">支持格式：JPG、PNG、PDF</p>
+                        </div>
+                        <div class="preview-area" id="previewArea" style="display: none;">
+                            <img id="previewImage" src="" alt="发票预览">
+                            <div class="preview-actions">
+                                <button class="btn btn-sm btn-secondary" onclick="rotateImage(-90)">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="rotateImage(90)">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="clearPreview()">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <input type="file" id="recognizeFile" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                    </div>
+                    <div class="recognize-result" id="recognizeResult" style="display: none;">
+                        <div class="result-header">
+                            <h4>识别结果</h4>
+                            <div class="confidence-indicator">
+                                <span>识别置信度：</span>
+                                <div class="confidence-bar">
+                                    <div class="confidence-value" id="confidenceValue"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-content">
+                            <div class="result-item">
+                                <label>发票号码</label>
+                                <div class="result-value" id="recognizedNumber"></div>
+                            </div>
+                            <div class="result-item">
+                                <label>开票日期</label>
+                                <div class="result-value" id="recognizedDate"></div>
+                            </div>
+                            <div class="result-item">
+                                <label>金额</label>
+                                <div class="result-value" id="recognizedAmount"></div>
+                            </div>
+                            <div class="result-item">
+                                <label>开票单位</label>
+                                <div class="result-value" id="recognizedCompany"></div>
+                            </div>
+                        </div>
+                        <div class="result-actions">
+                            <button class="btn btn-primary" onclick="useRecognizedResult()">
+                                <i class="fas fa-check"></i>
+                                使用识别结果
+                            </button>
+                            <button class="btn btn-secondary" onclick="retryRecognize()">
+                                <i class="fas fa-redo"></i>
+                                重新识别
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 发票数据
+        let invoices = [
+            {
+                id: 'INV001',
+                number: 'FP202401001',
+                game: '王者荣耀',
+                company: '腾讯游戏',
+                date: '2024-01-15',
+                amount: 100000.00,
+                status: 'issued',
+                file: 'invoice1.pdf'
+            },
+            {
+                id: 'INV002',
+                number: 'FP202401002',
+                game: '和平精英',
+                company: '腾讯游戏',
+                date: '2024-01-20',
+                amount: 80000.00,
+                status: 'pending',
+                file: null
+            },
+            {
+                id: 'INV003',
+                number: 'FP202401003',
+                game: '开心消消乐',
+                company: '快乐互娱',
+                date: '2024-01-25',
+                amount: 50000.00,
+                status: 'error',
+                file: 'invoice3.pdf'
+            }
+        ];
+
+        // 页面加载时初始化
+        window.onload = function() {
+            renderInvoices();
+            updateStats();
+            loadGameOptions();
+            loadMonthOptions();
+        };
+
+        // 渲染发票列表
+        function renderInvoices() {
+            const tbody = document.getElementById('invoicesTableBody');
+            tbody.innerHTML = '';
+            
+            invoices.forEach(invoice => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="invoice-checkbox" value="${invoice.id}"></td>
+                    <td>${invoice.number}</td>
+                    <td>${invoice.game}</td>
+                    <td>${invoice.company}</td>
+                    <td>${invoice.date}</td>
+                    <td>¥${invoice.amount.toFixed(2)}</td>
+                    <td><span class="status-badge ${invoice.status}">${getStatusName(invoice.status)}</span></td>
+                    <td>
+                        ${invoice.file ? `
+                            <button class="btn btn-icon" onclick="downloadInvoice('${invoice.id}')" title="下载">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-icon" onclick="viewInvoice('${invoice.id}')" title="查看">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-icon" onclick="deleteInvoice('${invoice.id}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            document.getElementById('totalInvoices').textContent = invoices.length;
+            document.getElementById('issuedInvoices').textContent = invoices.filter(i => i.status === 'issued').length;
+            document.getElementById('pendingInvoices').textContent = invoices.filter(i => i.status === 'pending').length;
+            document.getElementById('errorInvoices').textContent = invoices.filter(i => i.status === 'error').length;
+        }
+
+        // 加载游戏选项
+        function loadGameOptions() {
+            const gameFilter = document.getElementById('gameFilter');
+            const gameSelect = document.getElementById('gameSelect');
+            const games = [...new Set(invoices.map(i => i.game))];
+            
+            games.forEach(game => {
+                gameFilter.add(new Option(game, game));
+                gameSelect.add(new Option(game, game));
+            });
+        }
+
+        // 加载月份选项
+        function loadMonthOptions() {
+            const monthFilter = document.getElementById('monthFilter');
+            const months = [...new Set(invoices.map(i => i.date.substring(0, 7)))];
+            
+            months.sort().forEach(month => {
+                monthFilter.add(new Option(month, month));
+            });
+        }
+
+        // 获取状态名称
+        function getStatusName(status) {
+            const statuses = {
+                'issued': '已开具',
+                'pending': '待开具',
+                'error': '异常'
+            };
+            return statuses[status] || status;
+        }
+
+        // 打开上传发票弹窗
+        function openUploadModal() {
+            document.getElementById('uploadModal').style.display = 'flex';
+            // 添加识别按钮
+            const modalBody = document.querySelector('#uploadModal .modal-body');
+            if (!document.getElementById('recognizeButton')) {
+                const recognizeBtn = document.createElement('button');
+                recognizeBtn.id = 'recognizeButton';
+                recognizeBtn.className = 'btn btn-secondary';
+                recognizeBtn.innerHTML = '<i class="fas fa-magic"></i> 智能识别';
+                recognizeBtn.onclick = openRecognizeModal;
+                modalBody.insertBefore(recognizeBtn, modalBody.firstChild);
+            }
+        }
+
+        // 关闭上传发票弹窗
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('uploadForm').reset();
+        }
+
+        // 保存发票
+        function saveInvoice() {
+            const form = document.getElementById('uploadForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const newInvoice = {
+                id: 'INV' + String(invoices.length + 1).padStart(3, '0'),
+                number: document.getElementById('invoiceNumber').value,
+                game: document.getElementById('gameSelect').value,
+                company: getCompanyByGame(document.getElementById('gameSelect').value),
+                date: document.getElementById('invoiceDate').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                status: 'pending',
+                file: document.getElementById('invoiceFile').files[0]?.name || null
+            };
+
+            invoices.push(newInvoice);
+            renderInvoices();
+            updateStats();
+            closeUploadModal();
+        }
+
+        // 根据游戏名称获取公司
+        function getCompanyByGame(gameName) {
+            const gameCompanies = {
+                '王者荣耀': '腾讯游戏',
+                '和平精英': '腾讯游戏',
+                '开心消消乐': '快乐互娱'
+            };
+            return gameCompanies[gameName] || '-';
+        }
+
+        // 下载发票
+        function downloadInvoice(invoiceId) {
+            const invoice = invoices.find(i => i.id === invoiceId);
+            if (invoice && invoice.file) {
+                // 这里应该是实际的下载逻辑
+                alert(`正在下载发票：${invoice.file}`);
+            }
+        }
+
+        let currentPreviewId = null;
+
+        // 查看发票
+        function viewInvoice(invoiceId) {
+            const invoice = invoices.find(i => i.id === invoiceId);
+            if (!invoice) return;
+
+            currentPreviewId = invoiceId;
+            
+            document.getElementById('previewInvoiceTitle').textContent = invoice.game;
+            document.getElementById('previewInvoiceNumber').textContent = invoice.number;
+            document.getElementById('previewInvoiceStatus').textContent = getStatusName(invoice.status);
+            document.getElementById('previewInvoiceStatus').className = `status-badge ${invoice.status}`;
+            document.getElementById('previewInvoiceDate').textContent = invoice.date;
+            document.getElementById('previewGameName').textContent = invoice.game;
+            document.getElementById('previewCompany').textContent = invoice.company;
+            document.getElementById('previewAmount').textContent = `¥${invoice.amount.toFixed(2)}`;
+            document.getElementById('previewRemarks').textContent = invoice.remarks || '-';
+
+            const filePreview = document.getElementById('previewFile');
+            if (invoice.file) {
+                filePreview.innerHTML = `
+                    <div class="file-info">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>${invoice.file}</span>
+                    </div>
+                `;
+            } else {
+                filePreview.innerHTML = '<div class="no-file">暂无发票文件</div>';
+            }
+
+            document.getElementById('previewModal').style.display = 'flex';
+        }
+
+        // 关闭预览弹窗
+        function closePreviewModal() {
+            document.getElementById('previewModal').style.display = 'none';
+            currentPreviewId = null;
+        }
+
+        // 下载预览中的发票
+        function downloadPreviewInvoice() {
+            if (currentPreviewId) {
+                downloadInvoice(currentPreviewId);
+            }
+        }
+
+        // 编辑发票
+        function editInvoice(invoiceId) {
+            const invoice = invoices.find(i => i.id === invoiceId);
+            if (!invoice) return;
+
+            document.getElementById('editInvoiceId').value = invoice.id;
+            document.getElementById('editInvoiceNumber').value = invoice.number;
+            document.getElementById('editGameSelect').value = invoice.game;
+            document.getElementById('editInvoiceDate').value = invoice.date;
+            document.getElementById('editAmount').value = invoice.amount;
+            document.getElementById('editStatus').value = invoice.status;
+            document.getElementById('editRemarks').value = invoice.remarks || '';
+
+            closePreviewModal();
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        // 关闭编辑弹窗
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('editForm').reset();
+        }
+
+        // 更新发票
+        function updateInvoice() {
+            const form = document.getElementById('editForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const invoiceId = document.getElementById('editInvoiceId').value;
+            const index = invoices.findIndex(i => i.id === invoiceId);
+            if (index === -1) return;
+
+            const updatedInvoice = {
+                ...invoices[index],
+                number: document.getElementById('editInvoiceNumber').value,
+                game: document.getElementById('editGameSelect').value,
+                company: getCompanyByGame(document.getElementById('editGameSelect').value),
+                date: document.getElementById('editInvoiceDate').value,
+                amount: parseFloat(document.getElementById('editAmount').value),
+                status: document.getElementById('editStatus').value,
+                remarks: document.getElementById('editRemarks').value
+            };
+
+            invoices[index] = updatedInvoice;
+            renderInvoices();
+            updateStats();
+            closeEditModal();
+        }
+
+        // 删除发票
+        function deleteInvoice(invoiceId) {
+            if (confirm('确定要删除这张发票吗？')) {
+                invoices = invoices.filter(i => i.id !== invoiceId);
+                renderInvoices();
+                updateStats();
+            }
+        }
+
+        // 打开批量操作弹窗
+        function openBatchOperationModal() {
+            document.getElementById('batchOperationModal').style.display = 'flex';
+        }
+
+        // 关闭批量操作弹窗
+        function closeBatchOperationModal() {
+            document.getElementById('batchOperationModal').style.display = 'none';
+        }
+
+        // 执行批量操作
+        function executeBatchOperation() {
+            const operation = document.getElementById('batchOperation').value;
+            const selectedInvoices = Array.from(document.querySelectorAll('.invoice-checkbox:checked')).map(cb => cb.value);
+            
+            if (selectedInvoices.length === 0) {
+                alert('请选择要操作的发票');
+                return;
+            }
+
+            switch (operation) {
+                case 'download':
+                    selectedInvoices.forEach(id => {
+                        const invoice = invoices.find(i => i.id === id);
+                        if (invoice && invoice.file) {
+                            downloadInvoice(id);
+                        }
+                    });
+                    break;
+                case 'export':
+                    exportInvoices(selectedInvoices);
+                    break;
+                case 'delete':
+                    if (confirm('确定要删除选中的发票吗？')) {
+                        invoices = invoices.filter(i => !selectedInvoices.includes(i.id));
+                        renderInvoices();
+                        updateStats();
+                    }
+                    break;
+            }
+
+            closeBatchOperationModal();
+        }
+
+        // 筛选发票
+        function filterInvoices() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const gameFilter = document.getElementById('gameFilter').value;
+            const monthFilter = document.getElementById('monthFilter').value;
+            
+            const filteredInvoices = invoices.filter(invoice => {
+                const matchesSearch = (invoice.number.toLowerCase().includes(searchText) ||
+                                    invoice.game.toLowerCase().includes(searchText));
+                const matchesStatus = !statusFilter || invoice.status === statusFilter;
+                const matchesGame = !gameFilter || invoice.game === gameFilter;
+                const matchesMonth = !monthFilter || invoice.date.startsWith(monthFilter);
+                
+                return matchesSearch && matchesStatus && matchesGame && matchesMonth;
+            });
+            
+            renderFilteredInvoices(filteredInvoices);
+        }
+
+        // 渲染筛选后的发票
+        function renderFilteredInvoices(filteredInvoices) {
+            const tbody = document.getElementById('invoicesTableBody');
+            tbody.innerHTML = '';
+            
+            filteredInvoices.forEach(invoice => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="invoice-checkbox" value="${invoice.id}"></td>
+                    <td>${invoice.number}</td>
+                    <td>${invoice.game}</td>
+                    <td>${invoice.company}</td>
+                    <td>${invoice.date}</td>
+                    <td>¥${invoice.amount.toFixed(2)}</td>
+                    <td><span class="status-badge ${invoice.status}">${getStatusName(invoice.status)}</span></td>
+                    <td>
+                        ${invoice.file ? `
+                            <button class="btn btn-icon" onclick="downloadInvoice('${invoice.id}')" title="下载">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-icon" onclick="viewInvoice('${invoice.id}')" title="查看">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-icon" onclick="deleteInvoice('${invoice.id}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 全选/取消全选
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.invoice-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+        }
+
+        // 侧边栏折叠功能
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
+
+        // 打开导入弹窗
+        function openImportModal() {
+            document.getElementById('importModal').style.display = 'flex';
+        }
+
+        // 关闭导入弹窗
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+            document.getElementById('importFile').value = '';
+            document.getElementById('skipExisting').checked = false;
+            document.getElementById('updateExisting').checked = false;
+        }
+
+        // 下载模板
+        function downloadTemplate() {
+            // 这里应该是实际的模板下载逻辑
+            const template = {
+                headers: ['发票号码', '游戏名称', '开票日期', '金额', '状态', '备注'],
+                rows: [
+                    ['FP202401001', '王者荣耀', '2024-01-15', '100000.00', '已开具', '示例数据']
+                ]
+            };
+            
+            // 创建一个带有示例数据的CSV文件
+            const csvContent = template.headers.join(',') + '\n' + 
+                             template.rows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '发票导入模板.csv';
+            link.click();
+        }
+
+        // 导入发票
+        function importInvoices() {
+            const fileInput = document.getElementById('importFile');
+            if (!fileInput.files.length) {
+                alert('请选择要导入的文件');
+                return;
+            }
+
+            const skipExisting = document.getElementById('skipExisting').checked;
+            const updateExisting = document.getElementById('updateExisting').checked;
+
+            // 这里应该是实际的文件读取和导入逻辑
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                // 模拟导入成功
+                alert('导入成功！');
+                closeImportModal();
+                // 刷新发票列表
+                renderInvoices();
+                updateStats();
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // 导出发票
+        function exportInvoices(selectedIds) {
+            const exportData = selectedIds 
+                ? invoices.filter(i => selectedIds.includes(i.id))
+                : invoices;
+
+            // 创建CSV内容
+            const headers = ['发票号码', '游戏名称', '公司', '开票日期', '金额', '状态', '备注'];
+            const rows = exportData.map(invoice => [
+                invoice.number,
+                invoice.game,
+                invoice.company,
+                invoice.date,
+                invoice.amount.toFixed(2),
+                getStatusName(invoice.status),
+                invoice.remarks || ''
+            ]);
+
+            const csvContent = headers.join(',') + '\n' + 
+                             rows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '发票数据.csv';
+            link.click();
+        }
+
+        // 状态追踪相关变量
+        let currentTrackingInvoiceId = null;
+        const statusFlow = {
+            'draft': { next: ['pending'], name: '草稿' },
+            'pending': { next: ['approved', 'rejected', 'revision'], name: '待审批' },
+            'revision': { next: ['pending'], name: '待修改' },
+            'rejected': { next: ['draft'], name: '已驳回' },
+            'approved': { next: ['issued'], name: '已审批' },
+            'issued': { next: [], name: '已开具' }
+        };
+
+        // 打开状态追踪弹窗
+        function openStatusTrackModal(invoiceId) {
+            const invoice = invoices.find(i => i.id === invoiceId);
+            if (!invoice) return;
+
+            currentTrackingInvoiceId = invoiceId;
+            
+            document.getElementById('trackingInvoiceNumber').textContent = `发票号码：${invoice.number}`;
+            document.getElementById('trackingCurrentStatus').textContent = getStatusName(invoice.status);
+            document.getElementById('trackingCurrentStatus').className = `badge ${invoice.status}`;
+
+            // 生成状态时间线
+            const timeline = document.getElementById('statusTimeline');
+            timeline.innerHTML = generateTimeline(invoice);
+
+            // 根据当前状态设置可用的审批操作
+            updateApprovalActions(invoice.status);
+
+            document.getElementById('statusTrackModal').style.display = 'flex';
+        }
+
+        // 生成状态时间线
+        function generateTimeline(invoice) {
+            const statusHistory = invoice.statusHistory || [
+                { status: 'draft', time: '2024-01-15 10:00', operator: '张三', comments: '创建发票' },
+                { status: 'pending', time: '2024-01-15 10:30', operator: '张三', comments: '提交审批' },
+                { status: 'approved', time: '2024-01-15 14:20', operator: '李四', comments: '审批通过' },
+                { status: 'issued', time: '2024-01-15 15:00', operator: '王五', comments: '已开具发票' }
+            ];
+
+            return statusHistory.map((record, index) => `
+                <div class="timeline-item ${index === statusHistory.length - 1 ? 'current' : ''}">
+                    <div class="timeline-point"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <span class="timeline-status">${getStatusName(record.status)}</span>
+                            <span class="timeline-time">${record.time}</span>
+                        </div>
+                        <div class="timeline-body">
+                            <p><strong>操作人：</strong>${record.operator}</p>
+                            <p><strong>备注：</strong>${record.comments}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 更新可用的审批操作
+        function updateApprovalActions(currentStatus) {
+            const approvalAction = document.getElementById('approvalAction');
+            const nextStatuses = statusFlow[currentStatus]?.next || [];
+            
+            // 如果没有下一步状态，禁用审批操作
+            const approvalSection = document.querySelector('.approval-section');
+            if (nextStatuses.length === 0) {
+                approvalSection.style.display = 'none';
+                return;
+            }
+
+            approvalSection.style.display = 'block';
+            approvalAction.innerHTML = nextStatuses.map(status => `
+                <option value="${status}">${getStatusName(status)}</option>
+            `).join('');
+        }
+
+        // 提交审批
+        function submitApproval() {
+            const invoice = invoices.find(i => i.id === currentTrackingInvoiceId);
+            if (!invoice) return;
+
+            const action = document.getElementById('approvalAction').value;
+            const comments = document.getElementById('approvalComments').value;
+
+            if (!comments.trim()) {
+                alert('请填写审批意见');
+                return;
+            }
+
+            // 更新发票状态
+            invoice.status = action;
+            invoice.statusHistory = invoice.statusHistory || [];
+            invoice.statusHistory.push({
+                status: action,
+                time: new Date().toLocaleString(),
+                operator: '当前用户',
+                comments: comments
+            });
+
+            // 更新界面
+            renderInvoices();
+            updateStats();
+            closeStatusTrackModal();
+            
+            // 显示成功提示
+            alert('审批提交成功！');
+        }
+
+        // 关闭状态追踪弹窗
+        function closeStatusTrackModal() {
+            document.getElementById('statusTrackModal').style.display = 'none';
+            document.getElementById('approvalComments').value = '';
+            currentTrackingInvoiceId = null;
+        }
+
+        // 打开识别弹窗
+        function openRecognizeModal() {
+            closeUploadModal();
+            document.getElementById('recognizeModal').style.display = 'flex';
+            initializeRecognizeArea();
+        }
+
+        // 关闭识别弹窗
+        function closeRecognizeModal() {
+            document.getElementById('recognizeModal').style.display = 'none';
+            clearPreview();
+        }
+
+        // 初始化识别区域
+        function initializeRecognizeArea() {
+            const uploadArea = document.getElementById('uploadArea');
+            const recognizeFile = document.getElementById('recognizeFile');
+
+            // 点击上传
+            uploadArea.onclick = () => recognizeFile.click();
+
+            // 文件选择处理
+            recognizeFile.onchange = handleFileSelect;
+
+            // 拖拽处理
+            uploadArea.ondragover = (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            };
+
+            uploadArea.ondragleave = () => {
+                uploadArea.classList.remove('dragover');
+            };
+
+            uploadArea.ondrop = (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            };
+        }
+
+        // 处理文件选择
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        // 处理文件
+        function handleFile(file) {
+            if (!file.type.match('image.*') && file.type !== 'application/pdf') {
+                alert('请上传图片或PDF文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('uploadHint').style.display = 'none';
+                document.getElementById('previewArea').style.display = 'block';
+                
+                if (file.type.match('image.*')) {
+                    document.getElementById('previewImage').src = e.target.result;
+                } else {
+                    // PDF预览处理
+                    document.getElementById('previewImage').src = 'pdf-icon.png'; // 显示PDF图标
+                }
+
+                // 开始识别
+                startRecognize(file);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 旋转图片
+        function rotateImage(degree) {
+            const img = document.getElementById('previewImage');
+            const currentRotation = (img.dataset.rotation || 0) * 1;
+            const newRotation = currentRotation + degree;
+            img.style.transform = `rotate(${newRotation}deg)`;
+            img.dataset.rotation = newRotation;
+        }
+
+        // 清除预览
+        function clearPreview() {
+            document.getElementById('uploadHint').style.display = 'block';
+            document.getElementById('previewArea').style.display = 'none';
+            document.getElementById('recognizeResult').style.display = 'none';
+            document.getElementById('recognizeFile').value = '';
+            document.getElementById('previewImage').src = '';
+            document.getElementById('previewImage').style.transform = '';
+            document.getElementById('previewImage').dataset.rotation = 0;
+        }
+
+        // OCR配置
+        const OCR_CONFIG = {
+            API_KEY: '6I13nksatK7RsjGmbG8pkLwu',
+            SECRET_KEY: 'Z5RAE1oWlgwXV5F3fokcuVOP0Q204Ac6',
+            API_URL: 'https://aip.baidubce.com/rest/2.0/ocr/v1/vat_invoice',
+            APP_ID: '118369689'
+        };
+
+        // 获取百度OCR访问令牌
+        async function getAccessToken() {
+            try {
+                const response = await fetch(`https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${OCR_CONFIG.API_KEY}&client_secret=${OCR_CONFIG.SECRET_KEY}`);
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error_description || '获取访问令牌失败');
+                }
+                return data.access_token;
+            } catch (error) {
+                console.error('获取访问令牌失败:', error);
+                throw new Error('获取访问令牌失败，请检查网络连接或联系管理员');
+            }
+        }
+
+        // 开始识别
+        async function startRecognize(file) {
+            try {
+                // 显示加载状态
+                document.getElementById('recognizeResult').style.display = 'block';
+                document.getElementById('confidenceValue').style.width = '0%';
+                
+                // 检查文件大小
+                if (file.size > 4 * 1024 * 1024) {
+                    throw new Error('文件大小不能超过4MB');
+                }
+
+                // 显示加载提示
+                showLoadingTip('正在识别中...');
+                
+                // 将文件转换为Base64
+                const base64 = await fileToBase64(file);
+                
+                // 获取访问令牌
+                const accessToken = await getAccessToken();
+                
+                // 调用OCR API
+                const response = await fetch(`${OCR_CONFIG.API_URL}?access_token=${accessToken}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `image=${encodeURIComponent(base64)}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.error_code) {
+                    throw new Error(result.error_msg || '识别失败');
+                }
+
+                // 解析识别结果
+                const invoiceInfo = {
+                    confidence: result.words_result_num > 0 ? 95 : 0,
+                    number: result.words_result.InvoiceCode || '',
+                    date: formatDate(result.words_result.InvoiceDate),
+                    amount: result.words_result.TotalAmount || '',
+                    company: result.words_result.SellerName || ''
+                };
+
+                // 显示识别结果
+                document.getElementById('confidenceValue').style.width = invoiceInfo.confidence + '%';
+                document.getElementById('recognizedNumber').textContent = invoiceInfo.number;
+                document.getElementById('recognizedDate').textContent = invoiceInfo.date;
+                document.getElementById('recognizedAmount').textContent = '¥' + invoiceInfo.amount;
+                document.getElementById('recognizedCompany').textContent = invoiceInfo.company;
+
+                // 添加识别结果提示
+                showRecognizeSuccess();
+
+            } catch (error) {
+                console.error('发票识别失败:', error);
+                showRecognizeError(error.message);
+            } finally {
+                hideLoadingTip();
+            }
+        }
+
+        // 显示加载提示
+        function showLoadingTip(message) {
+            const loadingTip = document.createElement('div');
+            loadingTip.id = 'loadingTip';
+            loadingTip.className = 'loading-tip';
+            loadingTip.innerHTML = `
+                <div class="loading-spinner"></div>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(loadingTip);
+        }
+
+        // 隐藏加载提示
+        function hideLoadingTip() {
+            const loadingTip = document.getElementById('loadingTip');
+            if (loadingTip) {
+                loadingTip.remove();
+            }
+        }
+
+        // 文件转Base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 格式化日期
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            // 假设输入格式为YYYYMMDD
+            return dateStr.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+        }
+
+        // 显示识别成功提示
+        function showRecognizeSuccess() {
+            const resultHeader = document.querySelector('.result-header');
+            const successTip = document.createElement('div');
+            successTip.className = 'recognize-tip success';
+            successTip.innerHTML = '<i class="fas fa-check-circle"></i> 识别成功';
+            resultHeader.appendChild(successTip);
+            
+            // 3秒后自动移除提示
+            setTimeout(() => {
+                successTip.remove();
+            }, 3000);
+        }
+
+        // 显示识别错误提示
+        function showRecognizeError(message) {
+            const resultHeader = document.querySelector('.result-header');
+            const errorTip = document.createElement('div');
+            errorTip.className = 'recognize-tip error';
+            errorTip.innerHTML = `<i class="fas fa-exclamation-circle"></i> 识别失败: ${message}`;
+            resultHeader.appendChild(errorTip);
+            
+            // 5秒后自动移除提示
+            setTimeout(() => {
+                errorTip.remove();
+            }, 5000);
+        }
+
+        // 使用识别结果
+        function useRecognizedResult() {
+            // 填充表单
+            document.getElementById('invoiceNumber').value = document.getElementById('recognizedNumber').textContent;
+            document.getElementById('invoiceDate').value = document.getElementById('recognizedDate').textContent;
+            document.getElementById('amount').value = document.getElementById('recognizedAmount').textContent.replace('¥', '');
+            
+            // 关闭识别弹窗，打开上传弹窗
+            closeRecognizeModal();
+            openUploadModal();
+        }
+
+        // 重新识别
+        function retryRecognize() {
+            const file = document.getElementById('recognizeFile').files[0];
+            if (file) {
+                startRecognize(file);
+            }
+        }
+    </script>
+
+    <style>
+    .modal-lg {
+        max-width: 800px;
+        width: 90%;
+    }
+
+    .invoice-preview {
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+    }
+
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .invoice-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .invoice-number {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .invoice-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .detail-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .detail-label {
+        color: #666;
+        min-width: 80px;
+    }
+
+    .invoice-file {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px dashed #ddd;
+        border-radius: 4px;
+        text-align: center;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .no-file {
+        color: #999;
+    }
+
+    .invoice-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    /* 导入步骤样式 */
+    .import-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .step {
+        display: flex;
+        gap: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        background: #007bff;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .step-content {
+        flex: 1;
+    }
+
+    .step-content h4 {
+        margin: 0 0 10px 0;
+    }
+
+    .step-content p {
+        margin: 0 0 10px 0;
+        color: #666;
+    }
+
+    .file-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px dashed #ddd;
+        border-radius: 4px;
+    }
+
+    /* 状态时间线样式 */
+    .status-timeline {
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .timeline-container {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-container::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-point {
+        position: absolute;
+        left: -30px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #007bff;
+    }
+
+    .timeline-item.current .timeline-point {
+        background: #28a745;
+        box-shadow: 0 0 0 2px #28a745;
+    }
+
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-left: 15px;
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .timeline-status {
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    .timeline-time {
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .timeline-body p {
+        margin: 5px 0;
+    }
+
+    .approval-section {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    /* 状态徽章样式 */
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .status-badge.draft {
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .status-badge.pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge.approved {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-badge.revision {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-badge.issued {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    /* 识别弹窗样式 */
+    .recognize-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .upload-area {
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .upload-area.dragover {
+        border-color: #007bff;
+        background: #f8f9fa;
+    }
+
+    .upload-hint {
+        color: #666;
+    }
+
+    .upload-hint i {
+        font-size: 48px;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+
+    .upload-tip {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    .preview-area {
+        position: relative;
+        max-height: 300px;
+        overflow: hidden;
+    }
+
+    .preview-area img {
+        max-width: 100%;
+        max-height: 300px;
+        transition: transform 0.3s;
+    }
+
+    .preview-actions {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        display: flex;
+        gap: 5px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 5px;
+        border-radius: 4px;
+    }
+
+    .recognize-result {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .confidence-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .confidence-bar {
+        width: 100px;
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .confidence-value {
+        height: 100%;
+        background: #28a745;
+        width: 0;
+        transition: width 0.5s;
+    }
+
+    .result-content {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .result-item {
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    .result-item label {
+        color: #666;
+        font-size: 12px;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .result-value {
+        font-weight: bold;
+    }
+
+    .result-actions {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    #recognizeButton {
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    /* 识别提示样式 */
+    .recognize-tip {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease;
+        z-index: 9999;
+    }
+
+    .recognize-tip.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .recognize-tip.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* 加载提示样式 */
+    .loading-tip {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        z-index: 10000;
+    }
+
+    .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #ffffff;
+        border-top: 3px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
+</body>
+</html> 

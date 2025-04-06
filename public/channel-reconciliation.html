@@ -6,139 +6,404 @@
     <title>渠道对账 - 游戏分成管理系统</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <h1 class="navbar-title">渠道对账</h1>
-        <button class="navbar-button" onclick="window.location.href='index.html'">
-            <i class="fas fa-home"></i> 返回首页
-        </button>
-    </nav>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-logo">
+                    <i class="fas fa-gamepad"></i>
+                    <span>游戏分成管理</span>
+                </a>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-title">功能导航</div>
+                    <a href="dev-reconciliation.html" class="menu-item">
+                        <i class="fas fa-code"></i>
+                        <span>研发对账</span>
+                    </a>
+                    <a href="channel-reconciliation.html" class="menu-item active">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>渠道对账</span>
+                    </a>
+                    <a href="game-library.html" class="menu-item">
+                        <i class="fas fa-gamepad"></i>
+                        <span>游戏库</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
 
-    <div class="container">
-        <div class="header-stats">
-            <div class="stat-card">
-                <div class="stat-title">本月总收入</div>
-                <div class="stat-value" id="monthlyTotal">¥0.00</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">本月分成金额</div>
-                <div class="stat-value" id="monthlyShare">¥0.00</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">税后实际分成</div>
-                <div class="stat-value" id="actualShare">¥0.00</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">本月游戏数</div>
-                <div class="stat-value" id="gameCount">0</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h2>对账信息</h2>
-                <div class="button-group">
-                    <button class="button secondary" onclick="viewHistory()">
-                        <i class="fas fa-history"></i> 查看历史
+        <!-- 主要内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航栏 -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="toggle-sidebar">
+                        <i class="fas fa-bars"></i>
                     </button>
-                    <button class="button secondary" onclick="exportExcel()">
-                        <i class="fas fa-file-excel"></i> 导出Excel
+                    <div class="breadcrumb">
+                        <span>渠道对账</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-container">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h1 class="page-title">渠道对账管理</h1>
+                        <p class="page-description">管理游戏渠道分成结算数据</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="openAddRecordModal()">
+                            <i class="fas fa-plus"></i>
+                            添加对账记录
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 筛选工具栏 -->
+                <div class="toolbar">
+                    <div class="filter-group">
+                        <select id="gameFilter" onchange="filterRecords()">
+                            <option value="">选择游戏</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="channelFilter" onchange="filterRecords()">
+                            <option value="">选择渠道</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="monthFilter" onchange="filterRecords()">
+                            <option value="">选择月份</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="statusFilter" onchange="filterRecords()">
+                            <option value="">全部状态</option>
+                            <option value="pending">待确认</option>
+                            <option value="confirmed">已确认</option>
+                            <option value="settled">已结算</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i>
+                        导出Excel
                     </button>
-                    <button class="button secondary" onclick="importCSV()">
-                        <i class="fas fa-file-import"></i> 导入CSV
-                    </button>
                 </div>
-            </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="month">对账月份</label>
-                    <input type="month" id="month" class="form-control">
+                <!-- 对账记录表格 -->
+                <div class="card">
+                    <div class="table-container">
+                        <table id="reconciliationTable">
+                            <thead>
+                                <tr>
+                                    <th>对账单号</th>
+                                    <th>游戏名称</th>
+                                    <th>渠道名称</th>
+                                    <th>结算月份</th>
+                                    <th>充值金额</th>
+                                    <th>渠道费率</th>
+                                    <th>税率</th>
+                                    <th>分成金额</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reconciliationTableBody">
+                                <!-- 数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="gameName">游戏名称</label>
-                    <input type="text" id="gameName" class="form-control" list="gameList">
-                    <datalist id="gameList"></datalist>
-                </div>
-                <div class="form-group">
-                    <label for="channelName">渠道名称</label>
-                    <input type="text" id="channelName" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="revenue">运营收入</label>
-                    <input type="number" id="revenue" class="form-control" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="shareRatio">分成比例(%)</label>
-                    <input type="number" id="shareRatio" class="form-control" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="taxRate">税率(%)</label>
-                    <input type="number" id="taxRate" class="form-control" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="remarks">备注</label>
-                    <input type="text" id="remarks" class="form-control">
-                </div>
-            </div>
 
-            <div class="button-group">
-                <button class="button primary" onclick="addRecord()">
-                    <i class="fas fa-plus"></i> 添加对账
-                </button>
-                <button class="button secondary" onclick="clearInputs()">
-                    <i class="fas fa-undo"></i> 清空输入
-                </button>
+                <!-- 汇总信息 -->
+                <div class="summary-section">
+                    <div class="summary-card">
+                        <div class="summary-title">本月待结算</div>
+                        <div class="summary-value">¥285,392.45</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">本月已结算</div>
+                        <div class="summary-value">¥156,782.30</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">累计结算金额</div>
+                        <div class="summary-value">¥1,856,392.75</div>
+                    </div>
+                </div>
             </div>
-
-            <div class="table-container">
-                <table id="reconciliationTable">
-                    <thead>
-                        <tr>
-                            <th>月份</th>
-                            <th>游戏名称</th>
-                            <th>渠道名称</th>
-                            <th>运营收入(¥)</th>
-                            <th>分成比例(%)</th>
-                            <th>分成金额(¥)</th>
-                            <th>税率(%)</th>
-                            <th>税费(¥)</th>
-                            <th>实际分成(¥)</th>
-                            <th>备注</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="3">合计</td>
-                            <td id="totalRevenue">¥0.00</td>
-                            <td>-</td>
-                            <td id="totalShare">¥0.00</td>
-                            <td>-</td>
-                            <td id="totalTax">¥0.00</td>
-                            <td id="totalActualShare">¥0.00</td>
-                            <td colspan="2"></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <div id="historyModal" class="modal">
+    <!-- 添加对账记录弹窗 -->
+    <div class="modal" id="addRecordModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>历史记录</h2>
-                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>添加对账记录</h2>
+                <button class="close-button" onclick="closeAddRecordModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body" id="historyList"></div>
+            <div class="modal-body">
+                <form id="addRecordForm">
+                    <div class="form-group">
+                        <label for="gameSelect">游戏名称</label>
+                        <select id="gameSelect" required>
+                            <option value="">请选择游戏</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="channelSelect">渠道名称</label>
+                        <select id="channelSelect" required>
+                            <option value="">请选择渠道</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="settlementMonth">结算月份</label>
+                        <input type="month" id="settlementMonth" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rechargeAmount">充值金额</label>
+                        <input type="number" id="rechargeAmount" min="0" step="0.01" required>
+                        <span class="input-suffix">元</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="channelRate">渠道费率</label>
+                        <input type="number" id="channelRate" min="0" max="100" step="0.1" required>
+                        <span class="input-suffix">%</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="taxRate">税率</label>
+                        <input type="number" id="taxRate" min="0" max="100" step="0.1" required>
+                        <span class="input-suffix">%</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddRecordModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveRecord()">保存</button>
+            </div>
         </div>
     </div>
 
-    <script src="channel-reconciliation.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        // 示例数据
+        let records = [
+            {
+                id: 'C001',
+                game: '王者荣耀',
+                channel: '应用宝',
+                month: '2024-01',
+                rechargeAmount: 1000000,
+                channelRate: 30,
+                taxRate: 6,
+                shareAmount: 658000,
+                status: 'pending'
+            },
+            {
+                id: 'C002',
+                game: '和平精英',
+                channel: '华为应用市场',
+                month: '2024-01',
+                rechargeAmount: 800000,
+                channelRate: 25,
+                taxRate: 6,
+                shareAmount: 564000,
+                status: 'confirmed'
+            }
+        ];
+
+        // 渠道列表
+        const channels = [
+            { id: 'CH001', name: '应用宝' },
+            { id: 'CH002', name: '华为应用市场' },
+            { id: 'CH003', name: '小米应用商店' },
+            { id: 'CH004', name: 'OPPO软件商店' },
+            { id: 'CH005', name: 'vivo应用商店' }
+        ];
+
+        // 页面加载时初始化
+        window.onload = function() {
+            initializeFilters();
+            renderRecords();
+            // 侧边栏切换
+            document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+        };
+
+        // 初始化筛选器
+        function initializeFilters() {
+            // 初始化游戏选择器
+            const gameSelect = document.getElementById('gameSelect');
+            const gameFilter = document.getElementById('gameFilter');
+            const games = [...new Set(records.map(record => record.game))];
+            games.forEach(game => {
+                gameSelect.add(new Option(game, game));
+                gameFilter.add(new Option(game, game));
+            });
+
+            // 初始化渠道选择器
+            const channelSelect = document.getElementById('channelSelect');
+            const channelFilter = document.getElementById('channelFilter');
+            channels.forEach(channel => {
+                channelSelect.add(new Option(channel.name, channel.name));
+                channelFilter.add(new Option(channel.name, channel.name));
+            });
+
+            // 初始化月份选择器
+            const monthFilter = document.getElementById('monthFilter');
+            const months = [...new Set(records.map(record => record.month))];
+            months.forEach(month => {
+                monthFilter.add(new Option(month, month));
+            });
+        }
+
+        // 渲染对账记录
+        function renderRecords(filteredRecords = records) {
+            const tbody = document.getElementById('reconciliationTableBody');
+            tbody.innerHTML = '';
+            
+            filteredRecords.forEach(record => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${record.id}</td>
+                    <td>${record.game}</td>
+                    <td>${record.channel}</td>
+                    <td>${record.month}</td>
+                    <td>¥${record.rechargeAmount.toLocaleString()}</td>
+                    <td>${record.channelRate}%</td>
+                    <td>${record.taxRate}%</td>
+                    <td>¥${record.shareAmount.toLocaleString()}</td>
+                    <td><span class="status-badge ${record.status}">${getStatusName(record.status)}</span></td>
+                    <td>
+                        <button class="btn btn-icon" onclick="editRecord('${record.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-icon" onclick="deleteRecord('${record.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 获取状态名称
+        function getStatusName(status) {
+            const statuses = {
+                'pending': '待确认',
+                'confirmed': '已确认',
+                'settled': '已结算'
+            };
+            return statuses[status] || status;
+        }
+
+        // 筛选记录
+        function filterRecords() {
+            const gameFilter = document.getElementById('gameFilter').value;
+            const channelFilter = document.getElementById('channelFilter').value;
+            const monthFilter = document.getElementById('monthFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            const filteredRecords = records.filter(record => {
+                const matchesGame = !gameFilter || record.game === gameFilter;
+                const matchesChannel = !channelFilter || record.channel === channelFilter;
+                const matchesMonth = !monthFilter || record.month === monthFilter;
+                const matchesStatus = !statusFilter || record.status === statusFilter;
+                return matchesGame && matchesChannel && matchesMonth && matchesStatus;
+            });
+            
+            renderRecords(filteredRecords);
+        }
+
+        // 打开添加记录弹窗
+        function openAddRecordModal() {
+            document.getElementById('addRecordModal').style.display = 'flex';
+        }
+
+        // 关闭添加记录弹窗
+        function closeAddRecordModal() {
+            document.getElementById('addRecordModal').style.display = 'none';
+            document.getElementById('addRecordForm').reset();
+        }
+
+        // 保存记录
+        function saveRecord() {
+            const form = document.getElementById('addRecordForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const rechargeAmount = parseFloat(document.getElementById('rechargeAmount').value);
+            const channelRate = parseFloat(document.getElementById('channelRate').value);
+            const taxRate = parseFloat(document.getElementById('taxRate').value);
+            
+            // 计算分成金额
+            const shareAmount = calculateShareAmount(rechargeAmount, channelRate, taxRate);
+
+            const newRecord = {
+                id: 'C' + String(records.length + 1).padStart(3, '0'),
+                game: document.getElementById('gameSelect').value,
+                channel: document.getElementById('channelSelect').value,
+                month: document.getElementById('settlementMonth').value,
+                rechargeAmount: rechargeAmount,
+                channelRate: channelRate,
+                taxRate: taxRate,
+                shareAmount: shareAmount,
+                status: 'pending'
+            };
+
+            records.push(newRecord);
+            renderRecords();
+            closeAddRecordModal();
+        }
+
+        // 计算分成金额
+        function calculateShareAmount(rechargeAmount, channelRate, taxRate) {
+            const channelFee = rechargeAmount * (channelRate / 100);
+            const taxAmount = rechargeAmount * (taxRate / 100);
+            return rechargeAmount - channelFee - taxAmount;
+        }
+
+        // 编辑记录
+        function editRecord(recordId) {
+            alert('编辑功能开发中...');
+        }
+
+        // 删除记录
+        function deleteRecord(recordId) {
+            if (confirm('确定要删除这条记录吗？')) {
+                records = records.filter(record => record.id !== recordId);
+                renderRecords();
+            }
+        }
+
+        // 导出到Excel
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(records.map(record => ({
+                '对账单号': record.id,
+                '游戏名称': record.game,
+                '渠道名称': record.channel,
+                '结算月份': record.month,
+                '充值金额': record.rechargeAmount,
+                '渠道费率': record.channelRate + '%',
+                '税率': record.taxRate + '%',
+                '分成金额': record.shareAmount,
+                '状态': getStatusName(record.status)
+            })));
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '渠道对账记录');
+            XLSX.writeFile(wb, '渠道对账数据.xlsx');
+        }
+    </script>
 </body>
 </html> 

@@ -3,75 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>分成收入表</title>
+    <title>研发对账 - 游戏分成管理系统</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>分成收入表</h1>
-        
-        <div class="actions">
-            <button onclick="addRow()">新增一行</button>
-            <button onclick="deleteLastRow()">删除最后一行</button>
-            <button onclick="exportCSV()">导出为CSV</button>
-            <button onclick="exportXLSX()">导出为XLSX</button>
-        </div>
-
-        <div class="filters">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="搜索游戏名称..." oninput="filterRecords()">
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-logo">
+                    <i class="fas fa-gamepad"></i>
+                    <span>游戏分成管理</span>
+                </a>
             </div>
-            <div class="month-filter">
-                <input type="month" id="monthFilter" onchange="filterRecords()">
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-title">功能导航</div>
+                    <a href="dev-reconciliation.html" class="menu-item active">
+                        <i class="fas fa-code"></i>
+                        <span>研发对账</span>
+                    </a>
+                    <a href="channel-reconciliation.html" class="menu-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>渠道对账</span>
+                    </a>
+                    <a href="game-library.html" class="menu-item">
+                        <i class="fas fa-gamepad"></i>
+                        <span>游戏库</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 主要内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航栏 -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="toggle-sidebar" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>研发对账</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-icon" title="刷新页面" onclick="window.location.reload()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-container">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h1 class="page-title">研发对账管理</h1>
+                        <p class="page-description">管理游戏研发分成结算数据</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="addRow()">
+                            <i class="fas fa-plus"></i>
+                            新增一行
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i>
+                            导出Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 筛选工具栏 -->
+                <div class="toolbar">
+                    <div class="filter-group">
+                        <select id="gameFilter" onchange="filterRecords()">
+                            <option value="">选择游戏</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="monthFilter" onchange="filterRecords()">
+                            <option value="">选择月份</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="statusFilter" onchange="filterRecords()">
+                            <option value="">全部状态</option>
+                            <option value="pending">待确认</option>
+                            <option value="confirmed">已确认</option>
+                            <option value="settled">已结算</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 对账记录表格 -->
+                <div class="card">
+                    <div class="table-container">
+                        <table id="reconciliationTable">
+                            <thead>
+                                <tr>
+                                    <th>游戏名称</th>
+                                    <th>结算月份</th>
+                                    <th>充值金额</th>
+                                    <th>测试费&代金券金额</th>
+                                    <th>可分配运营收入</th>
+                                    <th>通道费率(%)</th>
+                                    <th>通道费</th>
+                                    <th>税率(%)</th>
+                                    <th>税费</th>
+                                    <th>分成比例(%)</th>
+                                    <th>分成收入</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reconciliationTableBody">
+                                <!-- 数据将通过JavaScript动态加载 -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4">总计</td>
+                                    <td id="totalIncome">0.00</td>
+                                    <td>-</td>
+                                    <td id="totalChannelFee">0.00</td>
+                                    <td>-</td>
+                                    <td id="totalTax">0.00</td>
+                                    <td>-</td>
+                                    <td id="totalShare">0.00</td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 汇总信息 -->
+                <div class="summary-section">
+                    <div class="summary-card">
+                        <div class="summary-title">本月待结算</div>
+                        <div class="summary-value">¥0.00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">本月已结算</div>
+                        <div class="summary-value">¥0.00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">累计结算金额</div>
+                        <div class="summary-value">¥0.00</div>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>游戏名称</th>
-                        <th>结算月份</th>
-                        <th>充值金额</th>
-                        <th>测试费&代金券金额</th>
-                        <th>可分配运营收入</th>
-                        <th>通道费率 (%)</th>
-                        <th>通道费</th>
-                        <th>税率 (%)</th>
-                        <th>税费</th>
-                        <th>分成比例 (%)</th>
-                        <th>分成收入</th>
-                        <th>结果推导公式</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-
-        <div class="summary">
-            <h2>汇总</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>可分配运营收入 总计</th>
-                        <th>通道费 总计</th>
-                        <th>税费 总计</th>
-                        <th>分成收入 总计</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td id="totalIncome">0.00</td>
-                        <td id="totalChannelFee">0.00</td>
-                        <td id="totalTax">0.00</td>
-                        <td id="totalShare">0.00</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        </main>
     </div>
 
-    <script src="dev-reconciliation.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        // 示例数据
+        let records = [];
+
+        // 页面加载时初始化
+        window.onload = function() {
+            // 恢复侧边栏状态
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.querySelector('.sidebar').classList.add('collapsed');
+            }
+            
+            initializeFilters();
+            renderRecords();
+            
+            // 侧边栏切换
+            document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+        };
+
+        // 初始化筛选器
+        function initializeFilters() {
+            // 初始化游戏选择器
+            const gameFilter = document.getElementById('gameFilter');
+            const games = [...new Set(records.map(record => record.game))];
+            games.forEach(game => {
+                gameFilter.add(new Option(game, game));
+            });
+
+            // 初始化月份选择器
+            const monthFilter = document.getElementById('monthFilter');
+            const months = [...new Set(records.map(record => record.month))];
+            months.forEach(month => {
+                monthFilter.add(new Option(month, month));
+            });
+        }
+
+        // 添加新行
+        function addRow() {
+            const tbody = document.getElementById('reconciliationTableBody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="form-control" onchange="calculateRow(this)"></td>
+                <td><input type="month" class="form-control" onchange="calculateRow(this)"></td>
+                <td><input type="number" class="form-control" min="0" step="0.01" onchange="calculateRow(this)"></td>
+                <td><input type="number" class="form-control" min="0" step="0.01" onchange="calculateRow(this)"></td>
+                <td><input type="number" class="form-control" readonly></td>
+                <td><input type="number" class="form-control" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td><input type="number" class="form-control" readonly></td>
+                <td><input type="number" class="form-control" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td><input type="number" class="form-control" readonly></td>
+                <td><input type="number" class="form-control" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td><input type="number" class="form-control" readonly></td>
+                <td><span class="status-badge pending">待确认</span></td>
+                <td>
+                    <button class="btn btn-icon" onclick="deleteRow(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            updateTotals();
+        }
+
+        // 计算行数据
+        function calculateRow(input) {
+            const tr = input.closest('tr');
+            const rechargeAmount = parseFloat(tr.querySelector('td:nth-child(3) input').value) || 0;
+            const testAmount = parseFloat(tr.querySelector('td:nth-child(4) input').value) || 0;
+            const channelRate = parseFloat(tr.querySelector('td:nth-child(6) input').value) || 0;
+            const taxRate = parseFloat(tr.querySelector('td:nth-child(8) input').value) || 0;
+            const shareRate = parseFloat(tr.querySelector('td:nth-child(10) input').value) || 0;
+
+            // 计算可分配运营收入
+            const income = rechargeAmount - testAmount;
+            tr.querySelector('td:nth-child(5) input').value = income.toFixed(2);
+
+            // 计算通道费
+            const channelFee = income * (channelRate / 100);
+            tr.querySelector('td:nth-child(7) input').value = channelFee.toFixed(2);
+
+            // 计算税费
+            const tax = income * (taxRate / 100);
+            tr.querySelector('td:nth-child(9) input').value = tax.toFixed(2);
+
+            // 计算分成收入
+            const share = income * (shareRate / 100);
+            tr.querySelector('td:nth-child(11) input').value = share.toFixed(2);
+
+            updateTotals();
+        }
+
+        // 更新总计
+        function updateTotals() {
+            const tbody = document.getElementById('reconciliationTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            
+            let totalIncome = 0;
+            let totalChannelFee = 0;
+            let totalTax = 0;
+            let totalShare = 0;
+
+            rows.forEach(tr => {
+                totalIncome += parseFloat(tr.querySelector('td:nth-child(5) input').value) || 0;
+                totalChannelFee += parseFloat(tr.querySelector('td:nth-child(7) input').value) || 0;
+                totalTax += parseFloat(tr.querySelector('td:nth-child(9) input').value) || 0;
+                totalShare += parseFloat(tr.querySelector('td:nth-child(11) input').value) || 0;
+            });
+
+            document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
+            document.getElementById('totalChannelFee').textContent = totalChannelFee.toFixed(2);
+            document.getElementById('totalTax').textContent = totalTax.toFixed(2);
+            document.getElementById('totalShare').textContent = totalShare.toFixed(2);
+        }
+
+        // 删除行
+        function deleteRow(button) {
+            if (confirm('确定要删除这一行吗？')) {
+                const tr = button.closest('tr');
+                tr.remove();
+                updateTotals();
+            }
+        }
+
+        // 筛选记录
+        function filterRecords() {
+            const gameFilter = document.getElementById('gameFilter').value;
+            const monthFilter = document.getElementById('monthFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            const rows = document.querySelectorAll('#reconciliationTableBody tr');
+            rows.forEach(row => {
+                const game = row.querySelector('td:nth-child(1) input').value;
+                const month = row.querySelector('td:nth-child(2) input').value;
+                const status = row.querySelector('.status-badge').textContent;
+                
+                const matchesGame = !gameFilter || game === gameFilter;
+                const matchesMonth = !monthFilter || month === monthFilter;
+                const matchesStatus = !statusFilter || status === statusFilter;
+                
+                row.style.display = matchesGame && matchesMonth && matchesStatus ? '' : 'none';
+            });
+        }
+
+        // 导出到Excel
+        function exportToExcel() {
+            const rows = document.querySelectorAll('#reconciliationTableBody tr');
+            const data = Array.from(rows).map(row => ({
+                '游戏名称': row.querySelector('td:nth-child(1) input').value,
+                '结算月份': row.querySelector('td:nth-child(2) input').value,
+                '充值金额': row.querySelector('td:nth-child(3) input').value,
+                '测试费&代金券金额': row.querySelector('td:nth-child(4) input').value,
+                '可分配运营收入': row.querySelector('td:nth-child(5) input').value,
+                '通道费率(%)': row.querySelector('td:nth-child(6) input').value,
+                '通道费': row.querySelector('td:nth-child(7) input').value,
+                '税率(%)': row.querySelector('td:nth-child(8) input').value,
+                '税费': row.querySelector('td:nth-child(9) input').value,
+                '分成比例(%)': row.querySelector('td:nth-child(10) input').value,
+                '分成收入': row.querySelector('td:nth-child(11) input').value,
+                '状态': row.querySelector('.status-badge').textContent
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '研发对账记录');
+            XLSX.writeFile(wb, '研发对账数据.xlsx');
+        }
+
+        // 侧边栏折叠功能
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+            // 保存折叠状态到localStorage
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
+    </script>
 </body>
 </html> 
