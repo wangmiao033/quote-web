@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史账单 - 分成收入表</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover: #45a049;
+            --danger-color: #f44336;
+            --danger-hover: #da190b;
+            --border-color: #e0e0e0;
+            --background-color: #f5f5f5;
+            --header-bg: #f8f9fa;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --text-primary: #2c3e50;
+            --text-secondary: #666;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px var(--shadow-color);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 2.2rem;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), #17a2b8);
+            border-radius: 4px;
+        }
+
+        .back-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .back-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .history-list {
+            margin-top: 2rem;
+        }
+
+        .history-item {
+            background: linear-gradient(to bottom, #f8f9fa, #f0f0f0);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .history-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .history-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .history-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .history-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .history-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+        }
+
+        .delete-btn:hover {
+            background-color: var(--danger-hover);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .history-content {
+                grid-template-columns: 1fr;
+            }
+
+            .history-actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>历史账单</h1>
+            <a href="index.html" class="back-btn">返回首页</a>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- 历史账单列表将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+        });
+
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            const bills = JSON.parse(localStorage.getItem('bills')) || [];
+            
+            if (bills.length === 0) {
+                historyList.innerHTML = '<div class="history-item">暂无历史账单</div>';
+                return;
+            }
+
+            historyList.innerHTML = bills.map((bill, index) => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <div class="history-title">${bill.name}</div>
+                        <div class="history-date">${bill.date}</div>
+                    </div>
+                    <div class="history-content">
+                        <div class="history-info">
+                            <div class="history-label">结算周期</div>
+                            <div class="history-value">${bill.startDate} 至 ${bill.endDate}</div>
+                        </div>
+                        <div class="history-info">
+                            <div class="history-label">账单地址</div>
+                            <div class="history-value">${bill.address}</div>
+                        </div>
+                        <div class="history-info">
+                            <div class="history-label">总分成收入</div>
+                            <div class="history-value">¥${bill.totalShare}</div>
+                        </div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="action-btn" onclick="loadBill(${index})">加载账单</button>
+                        <button class="action-btn delete-btn" onclick="deleteBill(${index})">删除账单</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadBill(index) {
+            const bills = JSON.parse(localStorage.getItem('bills')) || [];
+            if (bills[index]) {
+                localStorage.setItem('currentBill', JSON.stringify(bills[index]));
+                window.location.href = 'index.html';
+            }
+        }
+
+        function deleteBill(index) {
+            if (confirm('确定要删除这个账单吗？')) {
+                const bills = JSON.parse(localStorage.getItem('bills')) || [];
+                bills.splice(index, 1);
+                localStorage.setItem('bills', JSON.stringify(bills));
+                loadHistory();
+            }
+        }
+    </script>
+</body>
+</html> 

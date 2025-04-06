@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渠道对账 - 游戏分成管理系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="navbar-title">渠道对账</h1>
+        <button class="navbar-button" onclick="window.location.href='index.html'">
+            <i class="fas fa-home"></i> 返回首页
+        </button>
+    </nav>
+
+    <div class="container">
+        <div class="header-stats">
+            <div class="stat-card">
+                <div class="stat-title">本月总收入</div>
+                <div class="stat-value" id="monthlyTotal">¥0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">本月分成金额</div>
+                <div class="stat-value" id="monthlyShare">¥0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">税后实际分成</div>
+                <div class="stat-value" id="actualShare">¥0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">本月游戏数</div>
+                <div class="stat-value" id="gameCount">0</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>对账信息</h2>
+                <div class="button-group">
+                    <button class="button secondary" onclick="viewHistory()">
+                        <i class="fas fa-history"></i> 查看历史
+                    </button>
+                    <button class="button secondary" onclick="exportExcel()">
+                        <i class="fas fa-file-excel"></i> 导出Excel
+                    </button>
+                    <button class="button secondary" onclick="importCSV()">
+                        <i class="fas fa-file-import"></i> 导入CSV
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="month">对账月份</label>
+                    <input type="month" id="month" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="gameName">游戏名称</label>
+                    <input type="text" id="gameName" class="form-control" list="gameList">
+                    <datalist id="gameList"></datalist>
+                </div>
+                <div class="form-group">
+                    <label for="channelName">渠道名称</label>
+                    <input type="text" id="channelName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="revenue">运营收入</label>
+                    <input type="number" id="revenue" class="form-control" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="shareRatio">分成比例(%)</label>
+                    <input type="number" id="shareRatio" class="form-control" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="taxRate">税率(%)</label>
+                    <input type="number" id="taxRate" class="form-control" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="remarks">备注</label>
+                    <input type="text" id="remarks" class="form-control">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="button primary" onclick="addRecord()">
+                    <i class="fas fa-plus"></i> 添加对账
+                </button>
+                <button class="button secondary" onclick="clearInputs()">
+                    <i class="fas fa-undo"></i> 清空输入
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table id="reconciliationTable">
+                    <thead>
+                        <tr>
+                            <th>月份</th>
+                            <th>游戏名称</th>
+                            <th>渠道名称</th>
+                            <th>运营收入(¥)</th>
+                            <th>分成比例(%)</th>
+                            <th>分成金额(¥)</th>
+                            <th>税率(%)</th>
+                            <th>税费(¥)</th>
+                            <th>实际分成(¥)</th>
+                            <th>备注</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3">合计</td>
+                            <td id="totalRevenue">¥0.00</td>
+                            <td>-</td>
+                            <td id="totalShare">¥0.00</td>
+                            <td>-</td>
+                            <td id="totalTax">¥0.00</td>
+                            <td id="totalActualShare">¥0.00</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>历史记录</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="channel-reconciliation.js"></script>
+</body>
+</html> 

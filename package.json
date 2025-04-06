@@ -1,0 +1,16 @@
+{
+  "name": "game-revenue-management",
+  "version": "1.0.0",
+  "description": "游戏分成管理系统",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Build completed'",
+    "start": "serve public"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0"
+  }
+} 

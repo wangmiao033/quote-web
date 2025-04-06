@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏库 - 游戏分成管理系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="navbar-title">游戏库</h1>
+        <button class="navbar-button" onclick="window.location.href='index.html'">
+            <i class="fas fa-home"></i> 返回首页
+        </button>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>游戏库管理</h2>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="gameName">游戏名称</label>
+                    <input type="text" id="gameName" class="form-control" placeholder="请输入游戏名称">
+                </div>
+                <div class="form-group">
+                    <label for="gameCode">游戏代码</label>
+                    <input type="text" id="gameCode" class="form-control" placeholder="请输入游戏代码">
+                </div>
+                <div class="form-group">
+                    <button class="button primary" onclick="addGame()">
+                        <i class="fas fa-plus"></i> 添加游戏
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="gameTable">
+                    <thead>
+                        <tr>
+                            <th>游戏名称</th>
+                            <th>游戏代码</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="game-library.js"></script>
+</body>
+</html> 

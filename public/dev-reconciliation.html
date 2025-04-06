@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分成收入表</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>分成收入表</h1>
+        
+        <div class="actions">
+            <button onclick="addRow()">新增一行</button>
+            <button onclick="deleteLastRow()">删除最后一行</button>
+            <button onclick="exportCSV()">导出为CSV</button>
+            <button onclick="exportXLSX()">导出为XLSX</button>
+        </div>
+
+        <div class="filters">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索游戏名称..." oninput="filterRecords()">
+            </div>
+            <div class="month-filter">
+                <input type="month" id="monthFilter" onchange="filterRecords()">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>游戏名称</th>
+                        <th>结算月份</th>
+                        <th>充值金额</th>
+                        <th>测试费&代金券金额</th>
+                        <th>可分配运营收入</th>
+                        <th>通道费率 (%)</th>
+                        <th>通道费</th>
+                        <th>税率 (%)</th>
+                        <th>税费</th>
+                        <th>分成比例 (%)</th>
+                        <th>分成收入</th>
+                        <th>结果推导公式</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="summary">
+            <h2>汇总</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>可分配运营收入 总计</th>
+                        <th>通道费 总计</th>
+                        <th>税费 总计</th>
+                        <th>分成收入 总计</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="totalIncome">0.00</td>
+                        <td id="totalChannelFee">0.00</td>
+                        <td id="totalTax">0.00</td>
+                        <td id="totalShare">0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="dev-reconciliation.js"></script>
+</body>
+</html> 
