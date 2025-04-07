@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>公司报销管理</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .expense-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            color: #f39c12;
+            background-color: #fef5e7;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-approved {
+            color: #27ae60;
+            background-color: #e9f7ef;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-rejected {
+            color: #e74c3c;
+            background-color: #fdedec;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            color: white;
+            z-index: 1000;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+        }
+        
+        .toast-success {
+            background-color: #27ae60;
+        }
+        
+        .toast-error {
+            background-color: #e74c3c;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>公司报销管理</h1>
+        
+        <div class="expense-form">
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="expenseDate">报销日期</label>
+                    <input type="date" id="expenseDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expenseType">报销类型</label>
+                    <select id="expenseType" required>
+                        <option value="travel">差旅费</option>
+                        <option value="meal">餐费</option>
+                        <option value="office">办公用品</option>
+                        <option value="entertainment">招待费</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expenseAmount">报销金额</label>
+                    <input type="number" id="expenseAmount" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expenseDescription">报销说明</label>
+                    <textarea id="expenseDescription" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expenseAttachment">附件</label>
+                    <input type="file" id="expenseAttachment">
+                </div>
+                
+                <button type="submit" class="button">提交报销</button>
+            </form>
+        </div>
+        
+        <div class="table-container">
+            <h2>报销记录</h2>
+            <table id="expenseTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>类型</th>
+                        <th>金额</th>
+                        <th>状态</th>
+                        <th>说明</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="expense-reimbursement.js"></script>
+</body>
+</html> 
