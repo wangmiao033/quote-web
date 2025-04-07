@@ -2,12 +2,5 @@
   "name": "quote-web",
   "version": "1.0.0",
   "description": "对账系统",
-  "scripts": {
-    "start": "serve public",
-    "build": "echo 'No build step needed'"
-  },
-  "dependencies": {
-    "axios": "^1.6.7",
-    "serve": "^14.2.1"
-  }
+  "private": true
 } 
