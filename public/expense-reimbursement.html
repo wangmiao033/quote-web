@@ -3,8 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>公司报销管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <style>
+        .icon-home::before { content: "\F02DC"; }
+        .icon-stats::before { content: "\F05E6"; }
+        .icon-chart::before { content: "\F0628"; }
+        .icon-channel::before { content: "\F1B2D"; }
+        .icon-dev::before { content: "\F0FCD"; }
+        .icon-games::before { content: "\F0B69"; }
+        .icon-analysis::before { content: "\F0C3C"; }
+        .icon-invoice::before { content: "\F0985"; }
+        .icon-payment::before { content: "\F0ED6"; }
+        .icon-expense::before { content: "\F0DA3"; }
+        .icon-users::before { content: "\F0849"; }
+        .icon-settings::before { content: "\F0493"; }
+
+        .nav-item i::before {
+            font-family: "Material Design Icons";
+            font-size: 20px;
+        }
+
         .expense-form {
             background-color: #fff;
             padding: 20px;
@@ -71,6 +90,20 @@
         @keyframes fadeOut {
             from { opacity: 1; }
             to { opacity: 0; }
+        }
+
+        .expense-form h2 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .table-container h2 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+            font-size: 18px;
+            font-weight: 500;
         }
     </style>
 </head>
