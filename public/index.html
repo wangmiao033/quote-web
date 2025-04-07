@@ -7,32 +7,115 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>游戏分成管理系统</h1>
-        </div>
+    <div class="layout">
+        <!-- 左侧导航栏 -->
+        <div class="sidebar">
+            <div class="logo">
+                <span class="logo-text">游戏分成管理</span>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">概览</div>
+                <a href="index.html" class="nav-item active">
+                    <i class="icon-home"></i>
+                    <span>控制台</span>
+                </a>
+            </div>
 
-        <div class="section">
-            <div class="section-title">功能导航</div>
-            <div class="button-group">
-                <button class="button" onclick="window.location.href='game-library.html'">游戏库管理</button>
-                <button class="button" onclick="window.location.href='channel-reconciliation.html'">渠道对账</button>
-                <button class="button" onclick="window.location.href='dev-reconciliation.html'">研发对账</button>
-                <button class="button" onclick="window.location.href='expense-reimbursement.html'">公司报销</button>
+            <div class="nav-section">
+                <div class="nav-title">收入管理</div>
+                <div class="nav-item">
+                    <i class="icon-stats"></i>
+                    <span>收入统计</span>
+                </div>
+                <div class="nav-item">
+                    <i class="icon-chart"></i>
+                    <span>收入分析</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">对账管理</div>
+                <a href="channel-reconciliation.html" class="nav-item">
+                    <i class="icon-channel"></i>
+                    <span>渠道对账</span>
+                </a>
+                <a href="dev-reconciliation.html" class="nav-item">
+                    <i class="icon-dev"></i>
+                    <span>研发对账</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">游戏管理</div>
+                <a href="game-library.html" class="nav-item">
+                    <i class="icon-games"></i>
+                    <span>游戏库</span>
+                </a>
+                <div class="nav-item">
+                    <i class="icon-analysis"></i>
+                    <span>游戏分析</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">财务管理</div>
+                <a href="invoice-management.html" class="nav-item">
+                    <i class="icon-invoice"></i>
+                    <span>发票管理</span>
+                </a>
+                <a href="payment-management.html" class="nav-item">
+                    <i class="icon-payment"></i>
+                    <span>付款管理</span>
+                </a>
+                <a href="expense-reimbursement.html" class="nav-item">
+                    <i class="icon-expense"></i>
+                    <span>公司报销</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">系统设置</div>
+                <div class="nav-item">
+                    <i class="icon-users"></i>
+                    <span>用户管理</span>
+                </div>
+                <div class="nav-item">
+                    <i class="icon-settings"></i>
+                    <span>系统设置</span>
+                </div>
             </div>
         </div>
 
-        <div class="section">
-            <div class="section-title">系统信息</div>
-            <div class="info-card">
-                <p>欢迎使用游戏分成管理系统！</p>
-                <p>本系统提供以下功能：</p>
-                <ul>
-                    <li>游戏库管理：添加、删除游戏信息</li>
-                    <li>渠道对账：记录和管理渠道对账信息</li>
-                    <li>研发对账：管理研发游戏分成和对账信息</li>
-                    <li>公司报销：管理员工报销申请和审批</li>
-                </ul>
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>控制台</h1>
+                <div class="user-info">
+                    <span class="user-name">管理员</span>
+                    <span class="user-role">系统管理员</span>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-title">游戏总数</div>
+                        <div class="stat-value">24</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">本月收入</div>
+                        <div class="stat-value">¥286,392.45</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">活跃渠道</div>
+                        <div class="stat-value">18</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">待处理对账</div>
+                        <div class="stat-value">6</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

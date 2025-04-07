@@ -75,61 +75,150 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>公司报销管理</h1>
-        
-        <div class="expense-form">
-            <form id="expenseForm">
-                <div class="form-group">
-                    <label for="expenseDate">报销日期</label>
-                    <input type="date" id="expenseDate" required>
+    <div class="layout">
+        <!-- 左侧导航栏 -->
+        <div class="sidebar">
+            <div class="logo">
+                <span class="logo-text">游戏分成管理</span>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">概览</div>
+                <a href="index.html" class="nav-item">
+                    <i class="icon-home"></i>
+                    <span>控制台</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">收入管理</div>
+                <div class="nav-item">
+                    <i class="icon-stats"></i>
+                    <span>收入统计</span>
                 </div>
-                
-                <div class="form-group">
-                    <label for="expenseType">报销类型</label>
-                    <select id="expenseType" required>
-                        <option value="travel">差旅费</option>
-                        <option value="meal">餐费</option>
-                        <option value="office">办公用品</option>
-                        <option value="entertainment">招待费</option>
-                        <option value="other">其他</option>
-                    </select>
+                <div class="nav-item">
+                    <i class="icon-chart"></i>
+                    <span>收入分析</span>
                 </div>
-                
-                <div class="form-group">
-                    <label for="expenseAmount">报销金额</label>
-                    <input type="number" id="expenseAmount" step="0.01" required>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">对账管理</div>
+                <a href="channel-reconciliation.html" class="nav-item">
+                    <i class="icon-channel"></i>
+                    <span>渠道对账</span>
+                </a>
+                <a href="dev-reconciliation.html" class="nav-item">
+                    <i class="icon-dev"></i>
+                    <span>研发对账</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">游戏管理</div>
+                <a href="game-library.html" class="nav-item">
+                    <i class="icon-games"></i>
+                    <span>游戏库</span>
+                </a>
+                <div class="nav-item">
+                    <i class="icon-analysis"></i>
+                    <span>游戏分析</span>
                 </div>
-                
-                <div class="form-group">
-                    <label for="expenseDescription">报销说明</label>
-                    <textarea id="expenseDescription" rows="3" required></textarea>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">财务管理</div>
+                <a href="invoice-management.html" class="nav-item">
+                    <i class="icon-invoice"></i>
+                    <span>发票管理</span>
+                </a>
+                <a href="payment-management.html" class="nav-item">
+                    <i class="icon-payment"></i>
+                    <span>付款管理</span>
+                </a>
+                <a href="expense-reimbursement.html" class="nav-item active">
+                    <i class="icon-expense"></i>
+                    <span>公司报销</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">系统设置</div>
+                <div class="nav-item">
+                    <i class="icon-users"></i>
+                    <span>用户管理</span>
                 </div>
-                
-                <div class="form-group">
-                    <label for="expenseAttachment">附件</label>
-                    <input type="file" id="expenseAttachment">
+                <div class="nav-item">
+                    <i class="icon-settings"></i>
+                    <span>系统设置</span>
                 </div>
-                
-                <button type="submit" class="button">提交报销</button>
-            </form>
+            </div>
         </div>
-        
-        <div class="table-container">
-            <h2>报销记录</h2>
-            <table id="expenseTable">
-                <thead>
-                    <tr>
-                        <th>日期</th>
-                        <th>类型</th>
-                        <th>金额</th>
-                        <th>状态</th>
-                        <th>说明</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>公司报销管理</h1>
+                <div class="user-info">
+                    <span class="user-name">管理员</span>
+                    <span class="user-role">系统管理员</span>
+                </div>
+            </div>
+
+            <div class="expense-form">
+                <h2>提交报销申请</h2>
+                <form id="expenseForm">
+                    <div class="form-group">
+                        <label for="expenseDate">报销日期</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expenseType">报销类型</label>
+                        <select id="expenseType" required>
+                            <option value="travel">差旅费</option>
+                            <option value="meal">餐费</option>
+                            <option value="office">办公用品</option>
+                            <option value="entertainment">招待费</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expenseAmount">报销金额</label>
+                        <input type="number" id="expenseAmount" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expenseDescription">报销说明</label>
+                        <textarea id="expenseDescription" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expenseAttachment">附件</label>
+                        <input type="file" id="expenseAttachment">
+                    </div>
+                    
+                    <button type="submit" class="button">提交报销</button>
+                </form>
+            </div>
+            
+            <div class="table-container">
+                <h2>报销记录</h2>
+                <table id="expenseTable">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>类型</th>
+                            <th>金额</th>
+                            <th>状态</th>
+                            <th>说明</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
     
